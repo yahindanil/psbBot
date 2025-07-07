@@ -146,7 +146,7 @@ export default function AllModules() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5ECDA]" style={{ color: "#222" }}>
+    <div className="min-h-screen bg-[#F5ECDA]">
       <div className="container-without-padding">
         <header className="flex justify-between items-center mb-[15px] pl-[16px] pr-[16px] pt-[30px]">
           <h1>Все модули</h1>

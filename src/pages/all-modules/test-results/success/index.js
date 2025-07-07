@@ -5,7 +5,7 @@ import Button from "@/components/ui/Button";
 export default function Success() {
   return (
     <div className="min-h-screen bg-[#749484]">
-      <div className="container text-center relative">
+      <div className="container bg-[#749484] text-center relative">
         <Link href="/all-modules">
           <div
             className="absolute"
