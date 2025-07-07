@@ -48,7 +48,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={249}
             height={208}
-            priority
             loading="eager"
           />
         </div>
@@ -111,7 +110,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={285}
             height={238.64}
-            priority
             loading="eager"
           />
         </div>
@@ -148,7 +146,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={264}
             height={233}
-            priority
             loading="eager"
           />
         </div>
@@ -214,7 +211,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={349}
             height={238.64}
-            priority
             loading="eager"
           />
         </div>
@@ -258,7 +254,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={324}
             height={259.37}
-            priority
             loading="eager"
           />
         </div>
@@ -280,7 +275,6 @@ const lessonPages = [
             alt="Lock Icon"
             width={191}
             height={232.41}
-            priority
             loading="eager"
           />
         </div>
@@ -312,7 +306,6 @@ const lessonPages = [
               alt="Lock Icon"
               width={236}
               height={236}
-              priority
               loading="eager"
             />
           </div>
@@ -348,6 +341,73 @@ export default function Home() {
 
   return (
     <div className="container-without-padding pt-[20px] min-h-screen">
+      {/* Preload all images */}
+      <div style={{ display: "none" }}>
+        <Image
+          src="/images/lesson 1/main.png"
+          alt=""
+          width={501.45}
+          height={398}
+          priority
+        />
+        <Image
+          src="/images/Money.png"
+          alt=""
+          width={249}
+          height={208}
+          priority
+        />
+        <Image
+          src="/images/Snacks or Bike.png"
+          alt=""
+          width={285}
+          height={238.64}
+          priority
+        />
+        <Image
+          src="/images/Artem smiling.png"
+          alt=""
+          width={264}
+          height={233}
+          priority
+        />
+        <Image
+          src="/images/Happy and sad Artem.png"
+          alt=""
+          width={349}
+          height={238.64}
+          priority
+        />
+        <Image
+          src="/images/Artem happy.png"
+          alt=""
+          width={324}
+          height={259.37}
+          priority
+        />
+        <Image
+          src="/images/Lightbulb.png"
+          alt=""
+          width={191}
+          height={232.41}
+          priority
+        />
+        <Image
+          src="/images/Laptop.png"
+          alt=""
+          width={236}
+          height={236}
+          priority
+        />
+        <Image
+          src="/svgs/Arrow left.svg"
+          alt=""
+          width={5.5}
+          height={8}
+          priority
+        />
+      </div>
+
       <header className="relative flex items-center mb-[20px] min-h-[25px] pl-[16px] pr-[16px]">
         {/* Back button as Link, only on start page */}
         {page === 0 && (
@@ -360,7 +420,6 @@ export default function Home() {
               alt="Назад"
               width={5.5}
               height={8}
-              priority
               loading="eager"
               className="pr-[1px]"
             />
