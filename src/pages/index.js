@@ -16,19 +16,11 @@ export default function Home() {
         первые инвестиции без страха.{" "}
       </p>
       <Image
-        src="/Images/start page and modules page/Artem with cup.png"
+        src="/images/start page and modules page/Artem with cup.png"
         alt="Иллюстрация курса"
         width={320}
         height={296}
         className="relative z-10 h-auto select-none mx-auto mb-[16px]"
-        priority
-      />
-      <Image
-        src="/images/test/fail.png"
-        alt="Тест не пройден"
-        width={320}
-        height={320}
-        className="relative z-10 select-none mx-auto mb-[0px]"
         priority
       />
       <Link href="/all-modules">
