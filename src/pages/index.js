@@ -23,6 +23,14 @@ export default function Home() {
         className="relative z-10 h-auto select-none mx-auto mb-[16px]"
         priority
       />
+      <Image
+        src="/images/test/fail.png"
+        alt="Тест не пройден"
+        width={320}
+        height={320}
+        className="relative z-10 select-none mx-auto mb-[0px]"
+        priority
+      />
       <Link href="/all-modules">
         <Button className="w-[225px]">Начать учиться</Button>
       </Link>
