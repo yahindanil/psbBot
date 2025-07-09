@@ -329,7 +329,7 @@ const lessonPages = [
   },
 ];
 
-export default function Home() {
+export default function Lesson() {
   const [page, setPage] = useState(0);
 
   const handleStart = () => setPage(1);
