@@ -3,9 +3,13 @@ import Image from "next/image";
 import ModuleCard from "@/components/ui/ModuleCard";
 import LessonCard from "@/components/ui/LessonCard";
 import { useState } from "react";
+import { useUser } from "@/contexts/UserContext";
 
 export default function AllModules() {
   const [selectedModule, setSelectedModule] = useState(1);
+
+  // Получаем данные пользователя из контекста
+  const { telegramUser, dbUser } = useUser();
 
   // Списки уроков по модулям
   const lessonsByModule = {
@@ -160,6 +164,17 @@ export default function AllModules() {
             />
           </Link>
         </header>
+
+        {/* Debug информация для разработки */}
+        {process.env.NODE_ENV === "development" && (
+          <div className="mx-4 mb-4 p-3 bg-blue-100 rounded-lg text-sm">
+            <div className="font-bold mb-1">Информация о пользователе:</div>
+            <div>Telegram ID: {telegramUser?.id}</div>
+            <div>Имя: {telegramUser?.first_name}</div>
+            <div>БД ID: {dbUser?.id}</div>
+          </div>
+        )}
+
         <main className="">
           <div
             className="mb-[30px] overflow-x-auto"
