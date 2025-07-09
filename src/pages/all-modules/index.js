@@ -238,23 +238,14 @@ export default function AllModules() {
           </div>
         </main>
       </div>
-      <div className="border-[2px] border-[#ACC0B1] rounded-[15px] px-5 py-4 flex items-center gap-4 max-w-[420px] mx-auto mt-6 bg-white">
-        <Image
-          src="/images/personal account/time.svg"
-          alt="Песочные часы"
-          width={40}
-          height={40}
-          className="min-w-[40px]"
-          style={{ objectFit: "contain" }}
-        />
-        <div>
-          <div className="text-[#283B41] text-[22px] font-bold leading-tight mb-1">
-            15 минут
-          </div>
-          <div className="text-[#283B41] text-[16px] font-normal">
-            Среднее время занятий
-          </div>
-        </div>
+
+      <div className="text-center mt-6 mb-8">
+        <Link
+          href="/dev"
+          className="inline-block bg-[#4caf50] text-white px-6 py-3 rounded-lg font-semibold text-base hover:bg-[#45a049] transition-colors duration-300"
+        >
+          Dev - Данные пользователя
+        </Link>
       </div>
     </div>
   );
