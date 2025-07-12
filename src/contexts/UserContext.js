@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { createOrGetUser } from "@/utils/api";
+import { createOrGetUser, initializeBasicData } from "@/utils/api";
 
 const UserContext = createContext();
 
@@ -10,6 +10,18 @@ export const useUser = () => {
   }
   return context;
 };
+
+// Тестовые данные для локальной разработки
+const createMockUserData = () => ({
+  id: 123456789,
+  first_name: "John",
+  last_name: "Doe",
+  username: "johndoe",
+  language_code: "ru",
+  is_premium: false,
+  photo_url: null,
+  is_bot: false,
+});
 
 export const UserProvider = ({ children }) => {
   const [state, setState] = useState({
@@ -25,6 +37,9 @@ export const UserProvider = ({ children }) => {
     // Состояние загрузки и ошибок
     isInitializing: true,
     error: null,
+
+    // Флаг для режима разработки
+    isLocalDevelopment: false,
   });
 
   // Функция для логирования
@@ -32,9 +47,71 @@ export const UserProvider = ({ children }) => {
     console.log(`[UserContext] ${message}`, data || "");
   };
 
-  // Инициализация Telegram WebApp
+  // Проверяем, запущено ли приложение локально
+  const isLocalhost = () => {
+    if (typeof window === "undefined") return false;
+    return (
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1" ||
+      window.location.hostname === "::1"
+    );
+  };
+
+  // Инициализация Telegram WebApp или локальных данных
   useEffect(() => {
-    const initializeTelegram = async () => {
+    const initializeApp = async () => {
+      const isLocalDev = isLocalhost();
+
+      if (isLocalDev) {
+        log("🛠 РЕЖИМ РАЗРАБОТКИ: Используются тестовые данные");
+
+        // Создаем тестовые данные пользователя
+        const mockUserData = createMockUserData();
+
+        setState((prev) => ({
+          ...prev,
+          telegramUser: mockUserData,
+          isTelegramLoaded: true,
+          isInTelegram: false, // Не в Telegram, но это нормально для разработки
+          isLocalDevelopment: true,
+        }));
+
+        // Автоматически создаем/получаем пользователя в БД с тестовыми данными
+        try {
+          log("Инициализация базовых данных (модули и уроки)...");
+          await initializeBasicData();
+
+          log("Создание/получение тестового пользователя в БД...");
+
+          const dbUserData = await createOrGetUser({
+            telegram_id: mockUserData.id,
+            username: mockUserData.username,
+            first_name: mockUserData.first_name,
+          });
+
+          log("Тестовый пользователь успешно создан/получен в БД", dbUserData);
+
+          setState((prev) => ({
+            ...prev,
+            dbUser: dbUserData,
+            isDbUserLoaded: true,
+            isInitializing: false,
+          }));
+        } catch (error) {
+          log("Ошибка при работе с БД (тестовые данные)", error.message);
+
+          setState((prev) => ({
+            ...prev,
+            error: error.message,
+            isDbUserLoaded: true,
+            isInitializing: false,
+          }));
+        }
+
+        return;
+      }
+
+      // Обычная логика для Telegram
       log("Инициализация Telegram WebApp...");
 
       if (
@@ -62,6 +139,9 @@ export const UserProvider = ({ children }) => {
 
           // Автоматически создаем/получаем пользователя в БД
           try {
+            log("Инициализация базовых данных (модули и уроки)...");
+            await initializeBasicData();
+
             log("Создание/получение пользователя в БД...");
 
             const dbUserData = await createOrGetUser({
@@ -84,7 +164,7 @@ export const UserProvider = ({ children }) => {
             setState((prev) => ({
               ...prev,
               error: error.message,
-              isDbUserLoaded: true, // Помечаем как загруженное, даже если с ошибкой
+              isDbUserLoaded: true,
               isInitializing: false,
             }));
           }
@@ -110,13 +190,13 @@ export const UserProvider = ({ children }) => {
       }
     };
 
-    initializeTelegram();
+    initializeApp();
   }, []);
 
   // Функция для повторной попытки создания пользователя в БД
   const retryDbUser = async () => {
     if (!state.telegramUser) {
-      log("Нет данных Telegram для повторной попытки");
+      log("Нет данных пользователя для повторной попытки");
       return;
     }
 
@@ -169,11 +249,17 @@ export const UserProvider = ({ children }) => {
     error: state.error,
     retryDbUser,
 
+    // Дополнительные флаги
+    isLocalDevelopment: state.isLocalDevelopment,
+
     // Вспомогательные геттеры
     isReady:
       state.isTelegramLoaded && state.isDbUserLoaded && !state.isInitializing,
     hasError: !!state.error,
-    canUseApp: state.isInTelegram && state.telegramUser && state.dbUser,
+    canUseApp:
+      (state.isInTelegram || state.isLocalDevelopment) &&
+      state.telegramUser &&
+      state.dbUser,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

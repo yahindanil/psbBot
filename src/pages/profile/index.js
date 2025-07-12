@@ -1,7 +1,110 @@
 import Link from "next/link";
 import Image from "next/image";
+import { useState, useEffect, useMemo } from "react";
+import { useUser } from "@/contexts/UserContext";
+import { getUserProgress } from "@/utils/api";
 
 export default function Profile() {
+  const [userProgress, setUserProgress] = useState(null);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+
+  // Получаем данные пользователя из контекста
+  const { telegramUser } = useUser();
+
+  // Загружаем прогресс пользователя
+  useEffect(() => {
+    const fetchUserProgress = async () => {
+      if (!telegramUser?.id) return;
+
+      try {
+        setIsLoadingProgress(true);
+        const progress = await getUserProgress(telegramUser.id);
+        setUserProgress(progress);
+      } catch (error) {
+        console.error("[Profile] Ошибка загрузки прогресса:", error);
+        setUserProgress({ stats: { completed_lessons: 0, total_lessons: 14 } });
+      } finally {
+        setIsLoadingProgress(false);
+      }
+    };
+
+    fetchUserProgress();
+  }, [telegramUser?.id]);
+
+  // Вычисляем динамические значения
+  const completedLessons = userProgress?.stats?.completed_lessons || 0;
+  const totalLessons = userProgress?.stats?.total_lessons || 14;
+
+  // Вычисляем среднее время прохождения уроков
+  const averageTime = useMemo(() => {
+    if (!userProgress?.modules || completedLessons === 0) {
+      return { value: 0, text: "0" };
+    }
+
+    let totalTimeSeconds = 0;
+    let completedCount = 0;
+
+    userProgress.modules.forEach((module) => {
+      if (module.lessons) {
+        module.lessons.forEach((lesson) => {
+          if (lesson.completed && lesson.time_spent_seconds) {
+            totalTimeSeconds += lesson.time_spent_seconds;
+            completedCount++;
+          }
+        });
+      }
+    });
+
+    if (completedCount === 0) return { value: 0, text: "0" };
+
+    const averageSeconds = totalTimeSeconds / completedCount;
+    const averageMinutes = Math.round(averageSeconds / 60);
+
+    // Правильные падежи для минут
+    let minuteText;
+    if (averageMinutes % 10 === 1 && averageMinutes % 100 !== 11) {
+      minuteText = "минута";
+    } else if (
+      [2, 3, 4].includes(averageMinutes % 10) &&
+      ![12, 13, 14].includes(averageMinutes % 100)
+    ) {
+      minuteText = "минуты";
+    } else {
+      minuteText = "минут";
+    }
+
+    return {
+      value: averageMinutes,
+      text: `${averageMinutes} ${minuteText}`,
+    };
+  }, [userProgress, completedLessons]);
+
+  // Текст мотивации в зависимости от прогресса
+  const motivationText = useMemo(() => {
+    if (completedLessons === 0) {
+      return "Нужно только начать!";
+    } else if (completedLessons >= totalLessons) {
+      return "Молодец! Отличная работа!";
+    } else {
+      return "Ты на верном пути — не сбавляй темп!";
+    }
+  }, [completedLessons, totalLessons]);
+
+  // Имя пользователя
+  const userName = telegramUser?.first_name || "Пользователь";
+  if (isLoadingProgress) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-600 mb-2">Загружаем ваш профиль...</div>
+          <div className="text-sm text-gray-400">
+            Получаем данные о прогрессе
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white min-h-screen">
       <div className="container-without-padding text-center">
@@ -22,7 +125,7 @@ export default function Profile() {
           <div className="text-[16px] text-white font-semibold">
             Привет,
             <br />
-            Мария!
+            {userName}!
           </div>
           <div className="flex justify-center mt-[18px]">
             <Image
@@ -35,13 +138,13 @@ export default function Profile() {
             />
           </div>
           <div className="bg-[#D8E2DE] min-w-[288px] rounded-[15px] mx-auto mt-[-75px] mb-[15px] z-50 relative px-[14px] pt-[19px] pb-[14px]">
-            <div className="text-[#283B41] text-[14px] font-normal text-left mb-[12px]">
-              Ты на верном пути — не сбавляй темп!
+            <div className="text-[#283B41] text-[14px] font-normal text-center mb-[12px]">
+              {motivationText}
             </div>
             <div className="border-b border-[#283B41] mb-[7px]"></div>
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-semibold text-[#283B41] leading-none">
-                2/14
+                {completedLessons}/14
               </span>
               <div className="flex-1 flex justify-center">
                 {/* Прогрессбар */}
@@ -50,7 +153,7 @@ export default function Profile() {
                     <div
                       key={i}
                       className={`w-[9px] h-[16px] rounded-[5px] ${
-                        i < 2 ? "bg-[#749484]" : "bg-[#ACC0B1]"
+                        i < completedLessons ? "bg-[#749484]" : "bg-[#ACC0B1]"
                       }`}
                     />
                   ))}
@@ -66,17 +169,17 @@ export default function Profile() {
               />
             </div>
           </div>
-          <div className="border border-[#ACC0B1] rounded-[15px] px-[13px] py-[10px] flex items-start w-full max-w-[400px] mx-auto bg-white mb-[15px]">
+          <div className="border border-[#ACC0B1] rounded-[15px] px-[13px] py-[10px] flex items-start w-full max-w-[400px] mx-auto bg-white mb-[15px] ">
             <Image
               src="/images/personal account/time.png"
               alt="Песочные часы"
               width={13.4}
               height={20.76}
-              className="flex-shrink-0"
+              className="flex-shrink-0 mr-[10px]"
             />
             <div className="text-left">
               <div className="text-[#283B41] text-[14px] font-semibold">
-                15 минут
+                {averageTime.text}
               </div>
               <div className="text-[#222] text-[10px]">
                 Среднее время занятий

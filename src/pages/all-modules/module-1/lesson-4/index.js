@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import LessonNavButtons from "@/components/ui/LessonNavButtons";
+import TestBlock from "@/components/ui/TestBlock";
 
 const lessonPages = [
   {
@@ -10,13 +11,19 @@ const lessonPages = [
     content: (
       <>
         <h1 className="text-center text-[24px] font-semibold mb-[24px]">
-          Почему деньги <br />
-          не берутся <span className="bg-[#E9CDA7]">из воздуха</span>
+          Как инвестиции <br />
+          <span className="bg-[#E9CDA7]">помогают достичь</span> <br />
+          целей
         </h1>
+        <p className="text-center text-[16px] mb-[24px] px-[20px]">
+          В прошлом уроке мы узнали, что инфляция может съесть часть накоплений.
+          Давай разберемся, что же делать, если просто копить деньги —
+          недостаточно.
+        </p>
         <div className="mb-[11px]">
           <Image
-            src="/images/lesson 1/main.png"
-            alt="Lock Icon"
+            src="/images/lesson 4/main (3).png"
+            alt="Artem with phone"
             width={501.45}
             height={398}
             priority
@@ -34,18 +41,18 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <h2>Представь: тебе подарили 3000 ₽.</h2>
-          <div className="text-[10px] text-[#D8E2DE]">1/9</div>
+          <h2>Что такое инвестиции</h2>
+          <div className="text-[10px] text-[#D8E2DE]">1/11</div>
         </div>
         <p className="text-[16px] mb-[53px]">
-          Проходит всего пара дней — и ты не можешь вспомнить, куда они делись.
-          Вроде ничего особенного не купил, но денег уже нет. Почему так
-          произошло?
+          Инвестиции — это способ запустить деньги в работу. Вместо того чтобы
+          просто держать накопления в копилке или на карте, их можно вложить.
+          Например, в ценные бумаги.
         </p>
         <div className="flex justify-center mb-auto">
           <Image
-            src="/images/Money.png"
-            alt="Lock Icon"
+            src="/images/lesson 4/1.png"
+            alt="Plant growing"
             width={249}
             height={208}
             loading="eager"
@@ -59,27 +66,17 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            Почему деньги <br />{" "}
-            <span className="bg-[#E9CDA7]">быстро исчезают</span>
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">2/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Ценные бумаги — это документы, которые подтверждают, что ты дал на
+            время деньги какой-то компании.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">2/11</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          Деньги исчезают не потому, что с ними происходит что-то мистическое.
-          Просто мы не всегда замечаем, на что тратим.
-        </p>
-        <p className="mb-[30px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Приводим несколько сценариев:
-          </span>{" "}
-          увидел прикольный чехол для телефона — не удержался и купил, пошел с
-          друзьями в кафе голодный — купил лишнюю булочку.
-        </p>
-        <p>
-          Суммы вроде небольшие, но если не следить, за пару дней можно
-          потратить все карманные деньги.
+          Если у такой компании бизнес идет хорошо, ты можешь получить назад и
+          свои деньги, и еще проценты сверху. В следующих уроках подробнее
+          разберем, как работают разные ценные бумаги.
         </p>
       </>
     ),
@@ -89,61 +86,24 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>Как распоряжаться деньгами — это выбор</h2>
-          <div className="text-[10px] text-[#D8E2DE]">3/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Инвестиции — это не волшебство, не быстрый способ разбогатеть за
+            неделю, а инструмент.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">3/11</div>
         </div>
-        <p className="text-[16px] mb-[18px]">
-          Деньги у всех появляются примерно одинаково. Например, вы с друзьями
-          сделали что-то полезное по дому, продали на Авито свою коллекцию лего
-          или получили деньги в подарок на день рождения. Но что дальше с ними
-          будет, зависит от каждого из вас.
-        </p>
-        <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">Приводим примеры:</span>{" "}
-          кто-то тратит все сразу, а кто-то планирует и откладывает на новый
-          велик. Все дело в выборе.
-        </p>
-        <div className="flex justify-center">
-          <Image
-            src="/images/Snacks or Bike.png"
-            alt="Lock Icon"
-            width={285}
-            height={238.64}
-            loading="eager"
-          />
-        </div>
-      </>
-    ),
-    bg: "bg-white text-black",
-  },
-  {
-    type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">4/9</div>
-        </div>
-        <p className="text-[16px] mb-[10px]">
-          Есть три привычки, из-за которых деньги заканчиваются быстрее, чем
-          хотелось бы.
-        </p>
-        <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">Привычка 1.</span>{" "}
-          Покупать на эмоциях. Видишь яркий скетчбук или значки на рюкзак — и в
-          тот же момент покупаешь. Хотя дома уже есть два скетчбука, а значков —
-          полный ящик. Через день забываешь о новых покупках и уже не понимаешь,
-          зачем они тебе. Знакомо?
+
+        <p className="text-[16px] mb-[30px]">
+          Представь, что у тебя в игре есть артефакт. Он не делает всю работу за
+          тебя, но усиливает твоего героя. Например, дает бонус к силе.
+          Инвестиции работают так же: они помогают сохранить и увеличить
+          накопления.
         </p>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Artem smiling.png"
-            alt="Lock Icon"
+            src="/images/lesson 4/2.png"
+            alt="Artem pointing"
             width={264}
             height={233}
             loading="eager"
@@ -158,24 +118,16 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">5/9</div>
+          <h2>Чем инвестиции отличаются от обычного накопления</h2>
+          <div className="text-[10px] text-[#D8E2DE]">4/11</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Привычка 2. Повторять за другими.
-          </span>
-          <br />
-          Друг купил наушники, у одноклассников мерч от любимого блогера — и
-          тебе тоже хочется.
+        <p className="text-[16px] mb-[30px]">
+          Когда ты просто откладываешь деньги, сумма растет только за счет твоих
+          усилий: пополняешь копилку, на сколько можешь.
         </p>
-        <p className="text-[16px] mb-[18px]">
-          Скорее всего, тебе эти вещи не нужны, но ты все равно покупаешь. Так
-          деньги незаметно уходят на все подряд.
+        <p className="text-[16px] mb-[30px]">
+          А инвестиции строятся на предположениях, почему твои деньги могут
+          принести доход без пополнений. Это называется инвестиционная идея.
         </p>
       </>
     ),
@@ -185,32 +137,45 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">6/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Например, ты замечаешь, что многие ездят на электросамокатах. Если
+            тренд продолжится, компания, которая их делает, может заработать
+            больше.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">5/11</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Привычка 3. Ждать легких денег.
-          </span>
-          <br />В соцсетях часто попадается реклама: «Вложи сюда пару тысяч — и
-          за неделю получишь в два раза больше!» Звучит заманчиво.
+
+        <p className="text-[16px] mb-[30px]">
+          Если одолжить компании деньги на время под проценты, можно
+          потенциально заработать. Это и есть инвестиционная идея.
         </p>
-        <p className="text-[16px] mb-[18px]">
-          Но если тебе обещают деньги просто так — это обман. В надежде получить
-          больше можно все потерять.
-        </p>
+      </>
+    ),
+    bg: "bg-white text-black",
+  },
+  {
+    type: "lesson",
+    content: (
+      <>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            А еще инвестиции работают за счет{" "}
+            <span className="bg-[#D8E2DE] font-semibold">
+              сложного процента
+            </span>
+            : когда ты получаешь доход не только с вложенной суммы, но и с уже
+            накопленных процентов.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">6/11</div>
+        </div>
 
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Happy and sad Artem.png"
-            alt="Lock Icon"
-            width={349}
-            height={238.64}
+            src="/images/lesson 4/3.png"
+            alt="Magic lamp"
+            width={264}
+            height={233}
             loading="eager"
           />
         </div>
@@ -222,14 +187,22 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>Управлять деньгами можно научиться</h2>
-          <div className="text-[10px] text-[#D8E2DE]">7/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Эффект{" "}
+            <span className="bg-[#D8E2DE] font-semibold">
+              сложного процента
+            </span>{" "}
+            усиливается со временем. Это называется «деньги делают деньги». И
+            чем больше срок — тем сильнее этот эффект.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">7/11</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          Умение разбираться в деньгах называют{" "}
-          <span className="bg-[#D8E2DE]">финансовой грамотностью.</span> Она
-          помогает обращаться с деньгами так, чтобы их всегда хватало.
+
+        <p className="text-[16px] mb-[30px]">
+          Например, 1 млн ₽ через 5 лет в инвестициях может превратиться в 1,7
+          млн ₽, даже если не пополнять свои вложения. Так работает сложный
+          процент.
         </p>
       </>
     ),
@@ -240,20 +213,43 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <div></div>
-          <div className="text-[10px] text-[#D8E2DE]">8/9</div>
+          <h2>Инвестиции — это не гарантия, а возможность.</h2>
+          <div className="text-[10px] text-[#D8E2DE]">8/11</div>
         </div>
-        <p className="text-[16px] mb-[18px]">
-          Финансовая грамотность — это не суперспособность и не скучная теория,
-          а простые шаги, которые можно делать каждый день. Расскажу о них в
-          следующих уроках.
+        <p className="text-[16px] mb-[30px]">
+          Если идея не сработала, можно ничего не заработать и даже потерять
+          вложенные деньги. Поэтому инвесторы всегда внимательно оценивают, во
+          что вкладывают, зачем и что может пойти не так.
+        </p>
+      </>
+    ),
+    bg: "bg-[#749484] text-white",
+  },
+  {
+    type: "lesson",
+    content: (
+      <>
+        <div className="flex justify-between items-start mb-[15px]">
+          <h2>
+            Как инвестиции <br />
+            <span className="bg-[#E9CDA7]">помогают достичь целей</span>
+          </h2>
+          <div className="text-[10px] text-[#D8E2DE]">9/11</div>
+        </div>
+        <p className="text-[16px] mb-[30px]">
+          Допустим, ты хочешь накопить на телефон, просто откладывая деньги на
+          отдельный счет.
+        </p>
+        <p className="text-[16px] mb-[30px]">
+          Как быстро накопится нужная сумма, зависит от того, сколько ты сможешь
+          откладывать каждый месяц. Возможно, ждать придется долго.
         </p>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Artem happy.png"
-            alt="Lock Icon"
-            width={324}
-            height={259.37}
+            src="/images/lesson 4/4.png"
+            alt="Dartboard"
+            width={264}
+            height={233}
             loading="eager"
           />
         </div>
@@ -265,16 +261,40 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <div></div>
-          <div className="text-[10px] text-[#D8E2DE]">9/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Если вложить часть в инвестиции, есть шанс накопить быстрее. Деньги
+            начинают работать и приносить дополнительный доход. Есть возможность
+            достичь цели немного раньше или накопить больше, чем планируешь.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">10/11</div>
         </div>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Lightbulb.png"
-            alt="Lock Icon"
+            src="/images/lesson 4/5.png"
+            alt="Artem"
+            width={264}
+            height={233}
+            loading="eager"
+          />
+        </div>
+      </>
+    ),
+    bg: "bg-white text-black",
+  },
+  {
+    type: "lesson",
+    content: (
+      <>
+        <div className="flex justify-end mb-[15px]">
+          <div className="text-[10px] text-[#D8E2DE]">11/11</div>
+        </div>
+        <div className="flex justify-center mt-[20px]">
+          <Image
+            src="/images/lesson 4/6.png"
+            alt="Lightbulb"
             width={191}
-            height={232.41}
+            height={232}
             loading="eager"
           />
         </div>
@@ -282,13 +302,11 @@ const lessonPages = [
           Коротко о главном
         </h2>
         <p className="text-center text-white text-[16px]">
-          Деньги — это{" "}
-          <span className="bg-[#DFB57F]">не магия, а инструмент.</span>
-          <br />
-          Они не появляются просто так и не исчезают без причины.
-          <br />
-          Чем лучше ты понимаешь, как приходят и уходят деньги, тем проще тебе
-          ими управлять.
+          Инвестиции — это не магия и не кнопка «разбогатеть». Это инструмент,
+          который помогает{" "}
+          <span className="bg-[#DFB57F]">быстрее приблизиться к цели</span>,
+          если ты понимаешь, как он работает. Особенно если цель не на завтра, а
+          на год, два или три вперед.
         </p>
       </>
     ),
@@ -296,35 +314,7 @@ const lessonPages = [
   },
   {
     type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]"></div>
-        <div className="flex justify-center mt-[30px] mb-[53px]">
-          <div className="flex justify-center mt-[20px]">
-            <Image
-              src="/images/Laptop.png"
-              alt="Lock Icon"
-              width={236}
-              height={236}
-              loading="eager"
-            />
-          </div>
-        </div>
-        <h2 className="text-center text-black text-[22px] font-semibold mb-[15px]">
-          Проверь себя
-        </h2>
-        <p className="text-center text-black text-[16px] mb-[33px]">
-          Давай проверим на сколько ты усвоил пройденный урок
-        </p>
-        <div className="flex justify-center">
-          <Link href="/all-modules/module-1/lesson-1/test" className="block">
-            <button className="bg-[#F5ECDA] rounded-full py-[11px] text-black font-semibold text-[16px] w-[225px]">
-              Пройти тест
-            </button>
-          </Link>
-        </div>
-      </>
-    ),
+    content: <TestBlock testUrl="/all-modules/module-1/lesson-4/test" />,
     bg: "bg-[#DFB57F]",
   },
 ];
@@ -344,52 +334,52 @@ export default function Lesson() {
       {/* Preload all images */}
       <div style={{ display: "none" }}>
         <Image
-          src="/images/lesson 1/main.png"
+          src="/images/lesson 4/main (3).png"
           alt=""
           width={501.45}
           height={398}
           priority
         />
         <Image
-          src="/images/Money.png"
+          src="/images/lesson 4/1.png"
           alt=""
           width={249}
           height={208}
           priority
         />
         <Image
-          src="/images/Snacks or Bike.png"
-          alt=""
-          width={285}
-          height={238.64}
-          priority
-        />
-        <Image
-          src="/images/Artem smiling.png"
+          src="/images/lesson 4/2.png"
           alt=""
           width={264}
           height={233}
           priority
         />
         <Image
-          src="/images/Happy and sad Artem.png"
+          src="/images/lesson 4/3.png"
           alt=""
-          width={349}
-          height={238.64}
+          width={264}
+          height={233}
           priority
         />
         <Image
-          src="/images/Artem happy.png"
+          src="/images/lesson 4/4.png"
           alt=""
-          width={324}
-          height={259.37}
+          width={264}
+          height={233}
           priority
         />
         <Image
-          src="/images/Lightbulb.png"
+          src="/images/lesson 4/5.png"
+          alt=""
+          width={264}
+          height={233}
+          priority
+        />
+        <Image
+          src="/images/lesson 4/6.png"
           alt=""
           width={191}
-          height={232.41}
+          height={232}
           priority
         />
         <Image
@@ -427,7 +417,7 @@ export default function Lesson() {
         )}
         {/* Lesson label */}
         <div className="bg-[#749484] rounded-[30px] px-[15px] py-[5px] text-white text-[14px] mx-auto">
-          Урок 1
+          Урок 4
         </div>
       </header>
 
@@ -437,7 +427,7 @@ export default function Lesson() {
           {lessonPages[0].content}
           <div className="flex justify-center mb-[40px]">
             <Button className="w-[225px]" onClick={handleStart}>
-              Начать учиться
+              Начать урок
             </Button>
           </div>
         </div>

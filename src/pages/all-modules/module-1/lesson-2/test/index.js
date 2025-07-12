@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
-import { checkTestAndRedirect } from "@/utils/testUtils";
+import { checkTestAndRedirectWithAPI } from "@/utils/testUtils";
+import { useUser } from "@/contexts/UserContext";
 import Link from "next/link";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
@@ -42,7 +43,9 @@ export default function Test() {
   const [isChecked, setIsChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
+  const [testStartTime] = useState(Date.now());
   const router = useRouter();
+  const { telegramUser } = useUser();
 
   const handleCheck = () => {
     if (selected === null) return;
@@ -71,12 +74,16 @@ export default function Test() {
     setIsCorrect(prev ? prev.isCorrect : null);
   };
 
-  const handleFinish = () => {
-    checkTestAndRedirect({
+  const handleFinish = async () => {
+    const timeSpentSeconds = Math.floor((Date.now() - testStartTime) / 1000);
+
+    await checkTestAndRedirectWithAPI({
       correctAnswers: testData.map((q) => q.correct),
       userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
-      lessonUrl: "/all-modules/module-1/lesson-1",
+      lessonUrl: "/all-modules/module-1/lesson-2",
       router,
+      telegramUser,
+      timeSpentSeconds,
     });
   };
 

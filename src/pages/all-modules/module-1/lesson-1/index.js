@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import LessonNavButtons from "@/components/ui/LessonNavButtons";
+import TestBlock from "@/components/ui/TestBlock";
 
 const lessonPages = [
   {
@@ -240,14 +241,14 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <div></div>
+          <p className="text-[16px] mb-[18px]">
+            Финансовая грамотность — это не суперспособность и не скучная
+            теория, а простые шаги, которые можно делать каждый день. Расскажу о
+            них в следующих уроках.
+          </p>
           <div className="text-[10px] text-[#D8E2DE]">8/9</div>
         </div>
-        <p className="text-[16px] mb-[18px]">
-          Финансовая грамотность — это не суперспособность и не скучная теория,
-          а простые шаги, которые можно делать каждый день. Расскажу о них в
-          следующих уроках.
-        </p>
+
         <div className="flex justify-center mt-[20px]">
           <Image
             src="/images/Artem happy.png"
@@ -296,35 +297,7 @@ const lessonPages = [
   },
   {
     type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]"></div>
-        <div className="flex justify-center mt-[30px] mb-[53px]">
-          <div className="flex justify-center mt-[20px]">
-            <Image
-              src="/images/Laptop.png"
-              alt="Lock Icon"
-              width={236}
-              height={236}
-              loading="eager"
-            />
-          </div>
-        </div>
-        <h2 className="text-center text-black text-[22px] font-semibold mb-[15px]">
-          Проверь себя
-        </h2>
-        <p className="text-center text-black text-[16px] mb-[33px]">
-          Давай проверим на сколько ты усвоил пройденный урок
-        </p>
-        <div className="flex justify-center">
-          <Link href="/all-modules/module-1/lesson-1/test" className="block">
-            <button className="bg-[#F5ECDA] rounded-full py-[11px] text-black font-semibold text-[16px] w-[225px]">
-              Пройти тест
-            </button>
-          </Link>
-        </div>
-      </>
-    ),
+    content: <TestBlock testUrl="/all-modules/module-1/lesson-1/test" />,
     bg: "bg-[#DFB57F]",
   },
 ];

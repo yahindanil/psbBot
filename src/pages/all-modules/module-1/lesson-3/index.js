@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
 import LessonNavButtons from "@/components/ui/LessonNavButtons";
+import TestBlock from "@/components/ui/TestBlock";
 
 const lessonPages = [
   {
@@ -11,12 +12,12 @@ const lessonPages = [
       <>
         <h1 className="text-center text-[24px] font-semibold mb-[24px]">
           Почему деньги <br />
-          не берутся <span className="bg-[#E9CDA7]">из воздуха</span>
+          <span className="bg-[#E9CDA7]">теряют ценность</span>
         </h1>
         <div className="mb-[11px]">
           <Image
-            src="/images/lesson 1/main.png"
-            alt="Lock Icon"
+            src="/images/lesson 3/main (2).png"
+            alt="Artem thinking"
             width={501.45}
             height={398}
             priority
@@ -33,19 +34,23 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>Представь: тебе подарили 3000 ₽.</h2>
-          <div className="text-[10px] text-[#D8E2DE]">1/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Представь: ты копишь на велосипед. Наконец нужная сумма в копилке, а
+            цена выросла. Пришлось на два месяца отложить покупку, чтобы собрать
+            денег. А так хотелось летом гонять на новом велике!
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">1/7</div>
         </div>
+
         <p className="text-[16px] mb-[53px]">
-          Проходит всего пара дней — и ты не можешь вспомнить, куда они делись.
-          Вроде ничего особенного не купил, но денег уже нет. Почему так
-          произошло?
+          Иногда денег хватает на покупку сегодня, а через пару лет — уже нет.
+          Давай разбираться почему.
         </p>
         <div className="flex justify-center mb-auto">
           <Image
-            src="/images/Money.png"
-            alt="Lock Icon"
+            src="/images/lesson 3/1.png"
+            alt="Bicycle with coins"
             width={249}
             height={208}
             loading="eager"
@@ -60,56 +65,20 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            Почему деньги <br />{" "}
-            <span className="bg-[#E9CDA7]">быстро исчезают</span>
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">2/9</div>
+          <h2>Почему со временем на ту же сумму можно купить меньше</h2>
+          <div className="text-[10px] text-[#D8E2DE]">2/7</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          Деньги исчезают не потому, что с ними происходит что-то мистическое.
-          Просто мы не всегда замечаем, на что тратим.
+          Цены постепенно растут — это называют инфляцией. Денег в копилке
+          столько же, что и год назад, а купить на них получится меньше. И это
+          касается всего: техники, продуктов, одежды, транспорта.
         </p>
-        <p className="mb-[30px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Приводим несколько сценариев:
-          </span>{" "}
-          увидел прикольный чехол для телефона — не удержался и купил, пошел с
-          друзьями в кафе голодный — купил лишнюю булочку.
-        </p>
-        <p>
-          Суммы вроде небольшие, но если не следить, за пару дней можно
-          потратить все карманные деньги.
-        </p>
-      </>
-    ),
-    bg: "bg-white text-black",
-  },
-  {
-    type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>Как распоряжаться деньгами — это выбор</h2>
-          <div className="text-[10px] text-[#D8E2DE]">3/9</div>
-        </div>
-        <p className="text-[16px] mb-[18px]">
-          Деньги у всех появляются примерно одинаково. Например, вы с друзьями
-          сделали что-то полезное по дому, продали на Авито свою коллекцию лего
-          или получили деньги в подарок на день рождения. Но что дальше с ними
-          будет, зависит от каждого из вас.
-        </p>
-        <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">Приводим примеры:</span>{" "}
-          кто-то тратит все сразу, а кто-то планирует и откладывает на новый
-          велик. Все дело в выборе.
-        </p>
-        <div className="flex justify-center">
+        <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Snacks or Bike.png"
-            alt="Lock Icon"
+            src="/images/lesson 3/2.png"
+            alt="Croissant with price"
             width={285}
-            height={238.64}
+            height={238}
             loading="eager"
           />
         </div>
@@ -121,29 +90,24 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">4/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <p className="text-[16px] mb-[30px]">
+            Инфляция — не баг системы, а фича. Если бы инфляции совсем не было,
+            экономика не смогла бы развиваться. Не было бы так много товаров и
+            услуг, которые можно купить.
+          </p>
+          <div className="text-[10px] text-[#D8E2DE]">3/7</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          Есть три привычки, из-за которых деньги заканчиваются быстрее, чем
-          хотелось бы.
-        </p>
-        <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">Привычка 1.</span>{" "}
-          Покупать на эмоциях. Видишь яркий скетчбук или значки на рюкзак — и в
-          тот же момент покупаешь. Хотя дома уже есть два скетчбука, а значков —
-          полный ящик. Через день забываешь о новых покупках и уже не понимаешь,
-          зачем они тебе. Знакомо?
+
+        <p className="text-[16px] mb-[30px]">
+          Но, если просто хранить деньги в копилке или на карте, они теряют
+          ценность. Инфляция со временем сведет накопления. Согласен, неприятно,
+          но это так.
         </p>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Artem smiling.png"
-            alt="Lock Icon"
+            src="/images/lesson 3/3.png"
+            alt="Artem"
             width={264}
             height={233}
             loading="eager"
@@ -159,23 +123,46 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
+            Смотри, как <br />
+            <span className="bg-[#E9CDA7]">работает инфляция</span>
           </h2>
-          <div className="text-[10px] text-[#D8E2DE]">5/9</div>
+          <div className="text-[10px] text-[#D8E2DE]">4/7</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Привычка 2. Повторять за другими.
-          </span>
-          <br />
-          Друг купил наушники, у одноклассников мерч от любимого блогера — и
-          тебе тоже хочется.
+        <p className="text-[16px] mb-[30px]">
+          Впиши цену вещи, чтобы узнать, сколько она может стоить через год с
+          учетом инфляции*:
         </p>
-        <p className="text-[16px] mb-[18px]">
-          Скорее всего, тебе эти вещи не нужны, но ты все равно покупаешь. Так
-          деньги незаметно уходят на все подряд.
+        <div className="flex items-center justify-center mb-[30px]">
+          <div className="bg-white border border-gray-300 rounded-[8px] px-[16px] py-[12px] flex items-center">
+            <input
+              type="text"
+              placeholder="1"
+              className="text-[16px] font-semibold text-gray-900 bg-transparent border-none outline-none w-[40px]"
+            />
+            <span className="text-[16px] font-semibold text-gray-900 ml-[4px]">
+              ₽
+            </span>
+          </div>
+          <div className="mx-[16px]">
+            <Image
+              src="/images/lesson 3/exchange 1.svg"
+              alt="Exchange"
+              width={24}
+              height={24}
+              loading="eager"
+            />
+          </div>
+          <div className="bg-white border border-gray-300 rounded-[8px] px-[16px] py-[12px] flex items-center">
+            <span className="text-[16px] font-semibold text-gray-900">
+              1.07
+            </span>
+            <span className="text-[16px] font-semibold text-gray-900 ml-[4px]">
+              ₽
+            </span>
+          </div>
+        </div>
+        <p className="text-[12px] text-gray-500 text-center">
+          * С 2014 по 2024 год средняя инфляция в России составила 7,04%.
         </p>
       </>
     ),
@@ -186,31 +173,20 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <h2>
-            <span className="bg-[#E9CDA7]">Что мешает</span>
-            <br />
-            удержать деньги
-          </h2>
-          <div className="text-[10px] text-[#D8E2DE]">6/9</div>
+          <h2>Почему важно учитывать инфляцию при постановке целей</h2>
+          <div className="text-[10px] text-[#D8E2DE]">5/7</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Привычка 3. Ждать легких денег.
-          </span>
-          <br />В соцсетях часто попадается реклама: «Вложи сюда пару тысяч — и
-          за неделю получишь в два раза больше!» Звучит заманчиво.
+        <p className="text-[16px] mb-[30px]">
+          Если ты планируешь покупку через пару месяцев, инфляция не страшна.
+          Но, если собираешься копить год или больше, на всякий случай добавляй
+          к сумме запас — хотя бы 10%.
         </p>
-        <p className="text-[16px] mb-[18px]">
-          Но если тебе обещают деньги просто так — это обман. В надежде получить
-          больше можно все потерять.
-        </p>
-
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Happy and sad Artem.png"
-            alt="Lock Icon"
-            width={349}
-            height={238.64}
+            src="/images/lesson 3/4.png"
+            alt="Coins"
+            width={285}
+            height={238}
             loading="eager"
           />
         </div>
@@ -222,38 +198,20 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <h2>Управлять деньгами можно научиться</h2>
-          <div className="text-[10px] text-[#D8E2DE]">7/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <div className="text-[10px] text-[#D8E2DE]">6/7</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
-          Умение разбираться в деньгах называют{" "}
-          <span className="bg-[#D8E2DE]">финансовой грамотностью.</span> Она
-          помогает обращаться с деньгами так, чтобы их всегда хватало.
-        </p>
-      </>
-    ),
-    bg: "bg-white text-black",
-  },
-  {
-    type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <div></div>
-          <div className="text-[10px] text-[#D8E2DE]">8/9</div>
-        </div>
-        <p className="text-[16px] mb-[18px]">
-          Финансовая грамотность — это не суперспособность и не скучная теория,
-          а простые шаги, которые можно делать каждый день. Расскажу о них в
-          следующих уроках.
+        <p className="text-[16px] mb-[30px]">
+          Если не подстроиться под рост цен, в нужный момент может не хватить
+          денег на покупку. Но есть секретный прием, который поможет увеличить
+          твои накопления. О нем поговорим в следующем уроке.
         </p>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Artem happy.png"
-            alt="Lock Icon"
-            width={324}
-            height={259.37}
+            src="/images/lesson 3/5.png"
+            alt="Artem pointing"
+            width={264}
+            height={233}
             loading="eager"
           />
         </div>
@@ -265,16 +223,15 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-between items-start mb-[15px]">
-          <div></div>
-          <div className="text-[10px] text-[#D8E2DE]">9/9</div>
+        <div className="flex justify-end mb-[15px]">
+          <div className="text-[10px] text-[#D8E2DE]">7/7</div>
         </div>
         <div className="flex justify-center mt-[20px]">
           <Image
-            src="/images/Lightbulb.png"
-            alt="Lock Icon"
+            src="/images/lesson 3/6.png"
+            alt="Lightbulb"
             width={191}
-            height={232.41}
+            height={232}
             loading="eager"
           />
         </div>
@@ -282,13 +239,11 @@ const lessonPages = [
           Коротко о главном
         </h2>
         <p className="text-center text-white text-[16px]">
-          Деньги — это{" "}
-          <span className="bg-[#DFB57F]">не магия, а инструмент.</span>
-          <br />
-          Они не появляются просто так и не исчезают без причины.
-          <br />
-          Чем лучше ты понимаешь, как приходят и уходят деньги, тем проще тебе
-          ими управлять.
+          Инфляция{" "}
+          <span className="bg-[#DFB57F]">не просто скучный термин</span> из
+          учебника. Она влияет на твои покупки, цели и накопления. Но если
+          знаешь, как она работает, можешь учитывать это в планах, чтобы точно
+          хватило на твою цель.
         </p>
       </>
     ),
@@ -296,35 +251,7 @@ const lessonPages = [
   },
   {
     type: "lesson",
-    content: (
-      <>
-        <div className="flex justify-between items-start mb-[15px]"></div>
-        <div className="flex justify-center mt-[30px] mb-[53px]">
-          <div className="flex justify-center mt-[20px]">
-            <Image
-              src="/images/Laptop.png"
-              alt="Lock Icon"
-              width={236}
-              height={236}
-              loading="eager"
-            />
-          </div>
-        </div>
-        <h2 className="text-center text-black text-[22px] font-semibold mb-[15px]">
-          Проверь себя
-        </h2>
-        <p className="text-center text-black text-[16px] mb-[33px]">
-          Давай проверим на сколько ты усвоил пройденный урок
-        </p>
-        <div className="flex justify-center">
-          <Link href="/all-modules/module-1/lesson-1/test" className="block">
-            <button className="bg-[#F5ECDA] rounded-full py-[11px] text-black font-semibold text-[16px] w-[225px]">
-              Пройти тест
-            </button>
-          </Link>
-        </div>
-      </>
-    ),
+    content: <TestBlock testUrl="/all-modules/module-1/lesson-3/test" />,
     bg: "bg-[#DFB57F]",
   },
 ];
@@ -344,52 +271,59 @@ export default function Lesson() {
       {/* Preload all images */}
       <div style={{ display: "none" }}>
         <Image
-          src="/images/lesson 1/main.png"
+          src="/images/lesson 3/main (2).png"
           alt=""
           width={501.45}
           height={398}
           priority
         />
         <Image
-          src="/images/Money.png"
+          src="/images/lesson 3/1.png"
           alt=""
           width={249}
           height={208}
           priority
         />
         <Image
-          src="/images/Snacks or Bike.png"
+          src="/images/lesson 3/2.png"
           alt=""
           width={285}
-          height={238.64}
+          height={238}
           priority
         />
         <Image
-          src="/images/Artem smiling.png"
+          src="/images/lesson 3/3.png"
           alt=""
           width={264}
           height={233}
           priority
         />
         <Image
-          src="/images/Happy and sad Artem.png"
+          src="/images/lesson 3/exchange 1.svg"
           alt=""
-          width={349}
-          height={238.64}
+          width={24}
+          height={24}
           priority
         />
         <Image
-          src="/images/Artem happy.png"
+          src="/images/lesson 3/4.png"
           alt=""
-          width={324}
-          height={259.37}
+          width={285}
+          height={238}
           priority
         />
         <Image
-          src="/images/Lightbulb.png"
+          src="/images/lesson 3/5.png"
+          alt=""
+          width={264}
+          height={233}
+          priority
+        />
+        <Image
+          src="/images/lesson 3/6.png"
           alt=""
           width={191}
-          height={232.41}
+          height={232}
           priority
         />
         <Image
@@ -427,7 +361,7 @@ export default function Lesson() {
         )}
         {/* Lesson label */}
         <div className="bg-[#749484] rounded-[30px] px-[15px] py-[5px] text-white text-[14px] mx-auto">
-          Урок 1
+          Урок 3
         </div>
       </header>
 
@@ -437,7 +371,7 @@ export default function Lesson() {
           {lessonPages[0].content}
           <div className="flex justify-center mb-[40px]">
             <Button className="w-[225px]" onClick={handleStart}>
-              Начать учиться
+              Начать урок
             </Button>
           </div>
         </div>

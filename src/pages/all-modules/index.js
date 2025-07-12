@@ -2,16 +2,46 @@ import Link from "next/link";
 import Image from "next/image";
 import ModuleCard from "@/components/ui/ModuleCard";
 import LessonCard from "@/components/ui/LessonCard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
+import { getUserProgress } from "@/utils/api";
 
 export default function AllModules() {
   const [selectedModule, setSelectedModule] = useState(1);
+  const [userProgress, setUserProgress] = useState(null);
+  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // Получаем данные пользователя из контекста
-  const { telegramUser, dbUser } = useUser();
+  const { telegramUser, dbUser, isLocalDevelopment } = useUser();
 
-  // Списки уроков по модулям
+  // Загружаем прогресс пользователя
+  useEffect(() => {
+    const fetchUserProgress = async () => {
+      if (!telegramUser?.id) return;
+
+      try {
+        setIsLoadingProgress(true);
+        console.log(
+          `[AllModules] Загрузка прогресса для пользователя ${telegramUser.id}...`
+        );
+
+        const progress = await getUserProgress(telegramUser.id);
+        setUserProgress(progress);
+
+        console.log("[AllModules] Прогресс пользователя получен:", progress);
+      } catch (error) {
+        console.error("[AllModules] Ошибка загрузки прогресса:", error);
+        // Устанавливаем пустой прогресс для показа базового состояния
+        setUserProgress({ modules: [], stats: { completed_lessons: 0 } });
+      } finally {
+        setIsLoadingProgress(false);
+      }
+    };
+
+    fetchUserProgress();
+  }, [telegramUser?.id]);
+
+  // Базовые данные уроков (статичные метаданные)
   const lessonsByModule = {
     1: [
       {
@@ -20,7 +50,6 @@ export default function AllModules() {
         imageAlt: "Ruble",
         title: "Урок 1",
         text: "Почему деньги не берутся из воздуха",
-        state: "done",
         href: "/all-modules/module-1/lesson-1",
       },
       {
@@ -29,7 +58,6 @@ export default function AllModules() {
         imageAlt: "Target",
         title: "Урок 2",
         text: "Зачем ставить финансовые цели",
-        state: "done",
         href: "/all-modules/module-1/lesson-2",
       },
       {
@@ -38,7 +66,6 @@ export default function AllModules() {
         imageAlt: "Arrow",
         title: "Урок 3",
         text: "Почему деньги теряют ценность",
-        state: "open",
         href: "/all-modules/module-1/lesson-3",
       },
       {
@@ -47,7 +74,6 @@ export default function AllModules() {
         imageAlt: "Check",
         title: "Урок 4",
         text: "Как инвестиции помогают достичь целей",
-        state: "open",
         href: "/all-modules/module-1/lesson-4",
       },
     ],
@@ -58,7 +84,6 @@ export default function AllModules() {
         imageAlt: "Процент",
         title: "Урок 1",
         text: "Что можно назвать инвестициями, а что не стоит",
-        state: "open",
         href: "/all-modules/module-2/lesson-1",
       },
       {
@@ -67,7 +92,6 @@ export default function AllModules() {
         imageAlt: "График",
         title: "Урок 2",
         text: "Что такое инвестиционные инструменты",
-        state: "locked",
         href: "/all-modules/module-2/lesson-2",
       },
     ],
@@ -78,7 +102,6 @@ export default function AllModules() {
         imageAlt: "Акции",
         title: "Урок 1",
         text: "Что такое акции и как они работают",
-        state: "locked",
         href: "/all-modules/module-3/lesson-1",
       },
       {
@@ -87,7 +110,6 @@ export default function AllModules() {
         imageAlt: "Облигации",
         title: "Урок 2",
         text: "Облигации: как они работают и чем отличаются от акций",
-        state: "locked",
         href: "/all-modules/module-3/lesson-2",
       },
       {
@@ -96,7 +118,6 @@ export default function AllModules() {
         imageAlt: "ПИФ",
         title: "Урок 3",
         text: "ПИФ — как инвестировать во всё сразу",
-        state: "locked",
         href: "/all-modules/module-3/lesson-3",
       },
       {
@@ -105,7 +126,6 @@ export default function AllModules() {
         imageAlt: "Доходность и риск",
         title: "Урок 4",
         text: "Доходность и риск — как они связаны",
-        state: "locked",
         href: "/all-modules/module-3/lesson-4",
       },
     ],
@@ -116,7 +136,6 @@ export default function AllModules() {
         imageAlt: "Самостоятельно",
         title: "Урок 1",
         text: "Как начать инвестировать самостоятельно",
-        state: "locked",
         href: "/all-modules/module-4/lesson-1",
       },
       {
@@ -125,7 +144,6 @@ export default function AllModules() {
         imageAlt: "Готовые решения",
         title: "Урок 2",
         text: "Как инвестировать с помощью готовых решений",
-        state: "locked",
         href: "/all-modules/module-4/lesson-2",
       },
       {
@@ -134,7 +152,6 @@ export default function AllModules() {
         imageAlt: "Диверсификация",
         title: "Урок 3",
         text: "Что такое диверсификация и зачем она нужна",
-        state: "locked",
         href: "/all-modules/module-4/lesson-3",
       },
       {
@@ -143,10 +160,79 @@ export default function AllModules() {
         imageAlt: "Первые шаги",
         title: "Урок 4",
         text: "С чего начать: первые шаги в инвестициях",
-        state: "locked",
         href: "/all-modules/module-4/lesson-4",
       },
     ],
+  };
+
+  // Функция для определения состояния модуля
+  const getModuleState = (moduleNumber) => {
+    if (moduleNumber === 1) {
+      // Первый модуль всегда открыт
+      return "open";
+    }
+
+    if (!userProgress || !userProgress.modules) {
+      // Если прогресс не загружен, все модули кроме первого заблокированы
+      return "locked";
+    }
+
+    // Проверяем завершен ли предыдущий модуль
+    const prevModuleProgress = userProgress.modules.find(
+      (m) => m.order_index === moduleNumber - 1
+    );
+
+    if (prevModuleProgress && prevModuleProgress.completed) {
+      return "open";
+    }
+
+    return "locked";
+  };
+
+  // Функция для определения состояния урока
+  const getLessonState = (moduleNumber, lessonIndex) => {
+    // Если модуль заблокирован, все его уроки тоже заблокированы
+    const moduleState = getModuleState(moduleNumber);
+    if (moduleState === "locked") {
+      return "locked";
+    }
+
+    if (!userProgress || !userProgress.modules) {
+      // Если прогресс не загружен, но модуль открыт - показываем уроки как открытые
+      return "open";
+    }
+
+    // Находим модуль в прогрессе
+    const moduleProgress = userProgress.modules.find(
+      (m) => m.order_index === moduleNumber
+    );
+
+    if (!moduleProgress) {
+      // Модуль не найден в БД, но разблокирован - уроки открыты
+      return "open";
+    }
+
+    // Проверяем состояние конкретного урока
+    if (moduleProgress.lessons && moduleProgress.lessons[lessonIndex]) {
+      const lessonProgress = moduleProgress.lessons[lessonIndex];
+
+      if (lessonProgress.completed) {
+        return "done";
+      }
+    }
+
+    // Урок не завершен, но модуль открыт - урок доступен
+    return "open";
+  };
+
+  // Функция для получения уроков с динамическим состоянием
+  const getLessonsWithState = (moduleNumber) => {
+    const lessons = lessonsByModule[moduleNumber] || [];
+
+    return lessons.map((lesson, index) => ({
+      ...lesson,
+      state: getLessonState(moduleNumber, index),
+    }));
   };
 
   return (
@@ -165,13 +251,52 @@ export default function AllModules() {
           </Link>
         </header>
 
+        {/* Уведомление о режиме разработки */}
+        {isLocalDevelopment && (
+          <div className="mx-4 mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-sm">
+            <div className="font-bold mb-1 text-yellow-800">
+              🛠 РЕЖИМ РАЗРАБОТКИ
+            </div>
+            <div className="text-yellow-700">
+              Тестовый пользователь: {telegramUser?.first_name}{" "}
+              {telegramUser?.last_name}
+            </div>
+          </div>
+        )}
+
         {/* Debug информация для разработки */}
         {process.env.NODE_ENV === "development" && (
           <div className="mx-4 mb-4 p-3 bg-blue-100 rounded-lg text-sm">
             <div className="font-bold mb-1">Информация о пользователе:</div>
             <div>Telegram ID: {telegramUser?.id}</div>
-            <div>Имя: {telegramUser?.first_name}</div>
+            <div>
+              Имя: {telegramUser?.first_name} {telegramUser?.last_name}
+            </div>
+            <div>Username: @{telegramUser?.username}</div>
             <div>БД ID: {dbUser?.id}</div>
+            <div>Локальная разработка: {isLocalDevelopment ? "Да" : "Нет"}</div>
+            {userProgress && (
+              <div>
+                <div className="font-bold mt-2 mb-1">Прогресс:</div>
+                <div>
+                  Завершено уроков: {userProgress.stats?.completed_lessons || 0}
+                </div>
+                <div>
+                  Завершено модулей:{" "}
+                  {userProgress.stats?.completed_modules || 0}
+                </div>
+                <div>
+                  Общий прогресс: {userProgress.stats?.overall_progress || 0}%
+                </div>
+                <div className="font-bold mt-2 mb-1">Состояние модулей:</div>
+                <div>
+                  Модуль 1: {getModuleState(1)} | Модуль 2: {getModuleState(2)}{" "}
+                  | Модуль 3: {getModuleState(3)} | Модуль 4:{" "}
+                  {getModuleState(4)}
+                </div>
+                <div>Выбранный модуль: {selectedModule}</div>
+              </div>
+            )}
           </div>
         )}
 
@@ -193,7 +318,7 @@ export default function AllModules() {
                 imageAlt="Target"
                 title="Модуль №1"
                 text="Учимся ставить цели"
-                locked={false}
+                locked={getModuleState(1) === "locked"}
                 bgColor="#DFB57F"
                 onClick={() => setSelectedModule(1)}
               />
@@ -202,7 +327,7 @@ export default function AllModules() {
                 imageAlt="Target"
                 title="Модуль №2"
                 text="Знакомимся с миром инвестиций"
-                locked={true}
+                locked={getModuleState(2) === "locked"}
                 bgColor="#E9CDA7"
                 onClick={() => setSelectedModule(2)}
               />
@@ -211,7 +336,7 @@ export default function AllModules() {
                 imageAlt="Target"
                 title="Модуль №3"
                 text="Исследуем инструменты инвестора"
-                locked={true}
+                locked={getModuleState(3) === "locked"}
                 bgColor="#DFB57F"
                 onClick={() => setSelectedModule(3)}
               />
@@ -220,7 +345,7 @@ export default function AllModules() {
                 imageAlt="Target"
                 title="Модуль №4"
                 text="Собираем твой первый портфель"
-                locked={true}
+                locked={getModuleState(4) === "locked"}
                 bgColor="#E9CDA7"
                 onClick={() => setSelectedModule(4)}
               />
@@ -235,20 +360,33 @@ export default function AllModules() {
             <h2 className="font-semibold mb-[15px]">
               {`Модуль ${selectedModule}. Список уроков:`}
             </h2>
-            {lessonsByModule[selectedModule].length === 0 ? (
-              <div className="text-gray-400">Нет уроков для этого модуля</div>
+
+            {isLoadingProgress ? (
+              <div className="text-center py-8">
+                <div className="text-gray-600">
+                  Загружаем прогресс уроков...
+                </div>
+              </div>
             ) : (
-              lessonsByModule[selectedModule].map((lesson, idx) =>
-                lesson.href && lesson.state !== "locked" ? (
-                  <Link key={idx} href={lesson.href} legacyBehavior>
-                    <a style={{ display: "block" }}>
-                      <LessonCard {...lesson} />
-                    </a>
-                  </Link>
+              <>
+                {getLessonsWithState(selectedModule).length === 0 ? (
+                  <div className="text-gray-400">
+                    Нет уроков для этого модуля
+                  </div>
                 ) : (
-                  <LessonCard key={idx} {...lesson} />
-                )
-              )
+                  getLessonsWithState(selectedModule).map((lesson, idx) =>
+                    lesson.href && lesson.state !== "locked" ? (
+                      <Link key={idx} href={lesson.href} legacyBehavior>
+                        <a style={{ display: "block" }}>
+                          <LessonCard {...lesson} />
+                        </a>
+                      </Link>
+                    ) : (
+                      <LessonCard key={idx} {...lesson} />
+                    )
+                  )
+                )}
+              </>
             )}
           </div>
         </main>
