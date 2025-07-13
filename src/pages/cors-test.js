@@ -4,6 +4,19 @@ export default function CorsTest() {
   const [testResults, setTestResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Функция для нормализации URL (убирает двойные слэши)
+  const normalizeUrl = (baseUrl, endpoint) => {
+    const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+    const cleanEndpoint = endpoint.replace(/^\//, "");
+    const normalizedUrl = `${cleanBaseUrl}/${cleanEndpoint}`;
+
+    console.log(
+      `[CORS Test] URL нормализация: ${baseUrl} + ${endpoint} = ${normalizedUrl}`
+    );
+
+    return normalizedUrl;
+  };
+
   const addResult = (type, message, data = null) => {
     const timestamp = new Date().toLocaleTimeString();
     setTestResults((prev) => [
@@ -28,7 +41,8 @@ export default function CorsTest() {
     try {
       // Тест 1: Простой GET запрос
       addResult("info", "Тест 1: GET запрос к корню API");
-      const response1 = await fetch(`${apiUrl}`, {
+      const rootUrl = apiUrl.replace(/\/$/, ""); // Убираем завершающий слэш для корня
+      const response1 = await fetch(rootUrl, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -47,7 +61,8 @@ export default function CorsTest() {
 
       // Тест 2: OPTIONS запрос (preflight)
       addResult("info", "Тест 2: OPTIONS запрос (preflight check)");
-      const response2 = await fetch(`${apiUrl}/api/users`, {
+      const usersUrl = normalizeUrl(apiUrl, "/api/users");
+      const response2 = await fetch(usersUrl, {
         method: "OPTIONS",
         headers: {
           "Content-Type": "application/json",
@@ -63,7 +78,8 @@ export default function CorsTest() {
 
       // Тест 3: POST запрос
       addResult("info", "Тест 3: POST запрос к /api/users");
-      const response3 = await fetch(`${apiUrl}/api/users`, {
+      const postUrl = normalizeUrl(apiUrl, "/api/users");
+      const response3 = await fetch(postUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -120,7 +136,8 @@ export default function CorsTest() {
       try {
         addResult("info", `Тестируем с Origin: ${origin}`);
 
-        const response = await fetch(`${apiUrl}/api/users`, {
+        const testUrl = normalizeUrl(apiUrl, "/api/users");
+        const response = await fetch(testUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

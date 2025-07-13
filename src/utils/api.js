@@ -2,6 +2,22 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
+// Функция для нормализации URL (убирает двойные слэши)
+const normalizeUrl = (baseUrl, endpoint) => {
+  // Убираем завершающий слэш из базового URL
+  const cleanBaseUrl = baseUrl.replace(/\/$/, "");
+  // Убираем начальный слэш из эндпоинта, если он есть
+  const cleanEndpoint = endpoint.replace(/^\//, "");
+  // Соединяем с одним слэшем
+  const normalizedUrl = `${cleanBaseUrl}/${cleanEndpoint}`;
+
+  console.log(
+    `[API] URL нормализация: ${baseUrl} + ${endpoint} = ${normalizedUrl}`
+  );
+
+  return normalizedUrl;
+};
+
 // Проверяем корректность URL при инициализации
 if (typeof window !== "undefined") {
   console.log(`[API] Используется API Base URL: ${API_BASE_URL}`);
@@ -13,7 +29,9 @@ if (typeof window !== "undefined") {
  */
 const checkBaseUrlConnectivity = async () => {
   try {
-    const response = await fetch(API_BASE_URL, {
+    // Нормализуем URL для проверки доступности
+    const testUrl = API_BASE_URL.replace(/\/$/, ""); // Убираем завершающий слэш
+    const response = await fetch(testUrl, {
       method: "GET",
       mode: "cors",
     });
@@ -21,11 +39,13 @@ const checkBaseUrlConnectivity = async () => {
       accessible: true,
       status: response.status,
       statusText: response.statusText,
+      url: testUrl,
     };
   } catch (error) {
     return {
       accessible: false,
       error: error.message,
+      url: API_BASE_URL.replace(/\/$/, ""),
     };
   }
 };
@@ -89,7 +109,7 @@ const enhanceApiError = (
  */
 export const createOrGetUser = async (userData) => {
   const endpoint = "/api/users"; // Возвращаем правильный эндпоинт согласно документации
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   // Проверяем доступность базового URL
   const connectivity = await checkBaseUrlConnectivity();
@@ -175,7 +195,7 @@ export const createOrGetUser = async (userData) => {
  */
 export const getUserProgress = async (telegramId) => {
   const endpoint = `/api/users/${telegramId}/progress`;
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   try {
     console.log(`[API] Запрос к ${fullUrl}`);
@@ -220,7 +240,7 @@ export const completeLesson = async (
   timeSpentSeconds = 0
 ) => {
   const endpoint = `/api/users/${telegramId}/lessons/${lessonId}/complete`;
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
   const requestData = { telegramId, lessonId, timeSpentSeconds };
 
   try {
@@ -295,8 +315,12 @@ const filterDuplicateModules = (modules) => {
  * @returns {Promise<Array>} Список модулей
  */
 export const getModules = async () => {
+  const endpoint = "/api/modules";
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
   try {
-    const response = await fetch(`${API_BASE_URL}/api/modules`);
+    console.log(`[API] Запрос к ${fullUrl}`);
+    const response = await fetch(fullUrl);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -304,6 +328,7 @@ export const getModules = async () => {
     }
 
     const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
 
     // Извлекаем массив модулей из обертки согласно инструкции бекендера
     const modules = result.modules || result;
@@ -319,8 +344,9 @@ export const getModules = async () => {
 
     return modules;
   } catch (error) {
-    console.error("Ошибка получения модулей:", error);
-    throw error;
+    const enhancedError = enhanceApiError(error, endpoint);
+    console.error("Ошибка получения модулей:", enhancedError);
+    throw enhancedError;
   }
 };
 
@@ -330,10 +356,12 @@ export const getModules = async () => {
  * @returns {Promise<Array>} Список уроков
  */
 export const getModuleLessons = async (moduleId) => {
+  const endpoint = `/api/modules/${moduleId}/lessons`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/modules/${moduleId}/lessons`
-    );
+    console.log(`[API] Запрос к ${fullUrl}`);
+    const response = await fetch(fullUrl);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -341,11 +369,13 @@ export const getModuleLessons = async (moduleId) => {
     }
 
     const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
 
     // Извлекаем массив уроков из обертки согласно инструкции бекендера
     return result.lessons || result;
   } catch (error) {
-    console.error("Ошибка получения уроков модуля:", error);
-    throw error;
+    const enhancedError = enhanceApiError(error, endpoint);
+    console.error("Ошибка получения уроков модуля:", enhancedError);
+    throw enhancedError;
   }
 };
