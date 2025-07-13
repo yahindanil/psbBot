@@ -1091,6 +1091,22 @@ export default function DevPage() {
             Перейти к модулям
           </Link>
           <Link
+            href="/cors-test"
+            style={{
+              display: "inline-block",
+              backgroundColor: "#ff9800",
+              color: "white",
+              padding: "12px 24px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontWeight: "bold",
+              fontSize: "16px",
+              transition: "background-color 0.3s",
+            }}
+          >
+            🔍 CORS тест
+          </Link>
+          <Link
             href="/"
             style={{
               display: "inline-block",
