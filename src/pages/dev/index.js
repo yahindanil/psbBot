@@ -56,11 +56,11 @@ export default function DevPage() {
     addLog("info", "Загрузка всех модулей и уроков...");
 
     try {
-      // Получаем модули
-      const modulesResponse = await getModules();
+      // Получаем модули (теперь возвращается массив)
+      const modules = await getModules();
 
-      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
-        addLog("warning", "Модули не найдены. Инициализируйте данные.");
+      if (!modules || modules.length === 0) {
+        addLog("warning", "Модули не найдены.");
         setAllModules([]);
         return;
       }
@@ -68,15 +68,15 @@ export default function DevPage() {
       // Для каждого модуля получаем его уроки
       const modulesWithLessons = [];
 
-      for (const moduleItem of modulesResponse.modules) {
+      for (const moduleItem of modules) {
         addLog("info", `Загрузка уроков модуля: ${moduleItem.name}`);
 
         try {
-          const lessonsResponse = await getModuleLessons(moduleItem.id);
+          const lessons = await getModuleLessons(moduleItem.id);
 
           modulesWithLessons.push({
             ...moduleItem,
-            lessons: lessonsResponse.lessons || lessonsResponse || [],
+            lessons: lessons || [],
           });
         } catch (error) {
           addLog(
@@ -183,15 +183,14 @@ export default function DevPage() {
     addLog("info", "Очистка дублирующихся модулей...");
 
     try {
-      // Получаем все модули
-      const modulesResponse = await getModules();
+      // Получаем все модули (теперь возвращается массив)
+      const modules = await getModules();
 
-      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
+      if (!modules || modules.length === 0) {
         addLog("info", "Модули не найдены, очистка не требуется");
         return;
       }
 
-      const modules = modulesResponse.modules;
       addLog("info", `Найдено ${modules.length} модулей`);
 
       // Группируем модули по order_index
@@ -356,19 +355,17 @@ export default function DevPage() {
     addLog("info", "Поиск первого урока для завершения...");
 
     try {
-      // Сначала получаем модули
+      // Сначала получаем модули (теперь возвращается массив)
       addLog("info", "Получение списка модулей...");
-      const modulesResponse = await getModules();
+      const modules = await getModules();
 
-      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
-        addLog("error", "Модули не найдены. Сначала инициализируйте данные.");
+      if (!modules || modules.length === 0) {
+        addLog("error", "Модули не найдены.");
         return;
       }
 
       // Находим первый модуль (с order_index = 1)
-      const firstModule = modulesResponse.modules.find(
-        (m) => m.order_index === 1
-      );
+      const firstModule = modules.find((m) => m.order_index === 1);
       if (!firstModule) {
         addLog("error", "Первый модуль не найден");
         return;
@@ -379,16 +376,10 @@ export default function DevPage() {
         `Найден первый модуль: ${firstModule.name} (ID: ${firstModule.id})`
       );
 
-      // Получаем уроки первого модуля
+      // Получаем уроки первого модуля (теперь возвращается массив)
       addLog("info", "Получение уроков первого модуля...");
-      const lessonsResponse = await getModuleLessons(firstModule.id);
+      const lessons = await getModuleLessons(firstModule.id);
 
-      if (!lessonsResponse.lessons && !Array.isArray(lessonsResponse)) {
-        addLog("error", "Уроки в первом модуле не найдены");
-        return;
-      }
-
-      const lessons = lessonsResponse.lessons || lessonsResponse;
       if (!lessons || lessons.length === 0) {
         addLog("error", "Уроки в первом модуле не найдены");
         return;

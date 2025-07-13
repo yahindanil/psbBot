@@ -56,7 +56,7 @@ const enhanceApiError = (error, endpoint, requestData = null) => {
  * @returns {Promise<Object>} Объект пользователя из БД
  */
 export const createOrGetUser = async (userData) => {
-  const endpoint = "/api/users";
+  const endpoint = "/api/users"; // Возвращаем правильный эндпоинт согласно документации
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   try {
@@ -81,6 +81,8 @@ export const createOrGetUser = async (userData) => {
 
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
+
+    // Согласно документации, возвращается объект пользователя напрямую
     return result;
   } catch (error) {
     const enhancedError = enhanceApiError(error, endpoint, userData);
@@ -113,7 +115,14 @@ export const getUserProgress = async (telegramId) => {
 
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
-    return result;
+
+    // Согласно инструкции, API возвращает: { user: {...}, modules: [...], stats: {...} }
+    // Возвращаем структуру как есть для совместимости с существующим кодом
+    return {
+      user: result.user,
+      modules: result.modules || [],
+      stats: result.stats || { completed_lessons: 0 },
+    };
   } catch (error) {
     const enhancedError = enhanceApiError(error, endpoint, { telegramId });
     console.error(
@@ -222,16 +231,19 @@ export const getModules = async () => {
 
     const result = await response.json();
 
-    // Фильтруем дубликаты на фронтенде
-    if (result.modules) {
-      const filteredModules = filterDuplicateModules(result.modules);
+    // Извлекаем массив модулей из обертки согласно инструкции бекендера
+    const modules = result.modules || result;
+
+    // Фильтруем дубликаты на фронтенде (временное решение)
+    if (Array.isArray(modules)) {
+      const filteredModules = filterDuplicateModules(modules);
       console.log(
-        `[API] Отфильтровано ${result.modules.length} -> ${filteredModules.length} модулей`
+        `[API] Отфильтровано ${modules.length} -> ${filteredModules.length} модулей`
       );
-      return { ...result, modules: filteredModules };
+      return filteredModules;
     }
 
-    return result;
+    return modules;
   } catch (error) {
     console.error("Ошибка получения модулей:", error);
     throw error;
@@ -241,7 +253,7 @@ export const getModules = async () => {
 /**
  * Получает уроки модуля
  * @param {number} moduleId - ID модуля
- * @returns {Promise<Object>} Модуль с уроками
+ * @returns {Promise<Array>} Список уроков
  */
 export const getModuleLessons = async (moduleId) => {
   try {
@@ -255,7 +267,9 @@ export const getModuleLessons = async (moduleId) => {
     }
 
     const result = await response.json();
-    return result;
+
+    // Извлекаем массив уроков из обертки согласно инструкции бекендера
+    return result.lessons || result;
   } catch (error) {
     console.error("Ошибка получения уроков модуля:", error);
     throw error;
