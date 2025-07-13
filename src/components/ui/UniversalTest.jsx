@@ -13,8 +13,24 @@ export default function UniversalTest({ moduleId, lessonId }) {
   const [isCorrect, setIsCorrect] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
   const [testStartTime] = useState(Date.now());
+  const [logs, setLogs] = useState([]);
+  const [showLogs, setShowLogs] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const router = useRouter();
   const { telegramUser } = useUser();
+
+  // Функция для добавления логов на страницу
+  const addLog = (type, message, data = null) => {
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = {
+      timestamp,
+      type,
+      message,
+      data: data ? JSON.stringify(data, null, 2) : null,
+    };
+    setLogs((prev) => [...prev, logEntry]);
+    console.log(`[${type.toUpperCase()}] ${message}`, data || "");
+  };
 
   useEffect(() => {
     // Загружаем данные теста из JSON файла
@@ -58,29 +74,34 @@ export default function UniversalTest({ moduleId, lessonId }) {
 
   const handleFinish = async () => {
     if (!testData) return;
+
+    setIsProcessing(true);
+    setShowLogs(true);
+    setLogs([]); // Очищаем предыдущие логи
+
     const timeSpentSeconds = Math.floor((Date.now() - testStartTime) / 1000);
     const lessonUrl = `/all-modules/${moduleId}/${lessonId}`;
 
-    console.log(`[UniversalTest] Начало завершения теста:`, {
+    addLog("info", "Начало завершения теста", {
       moduleId,
       lessonId,
       lessonUrl,
       timeSpentSeconds,
-      telegramUser,
+      telegramUser: telegramUser
+        ? { id: telegramUser.id, first_name: telegramUser.first_name }
+        : null,
       userAnswers,
       correctAnswers: testData.map((q) => q.correct),
     });
 
     try {
-      console.log(`[UniversalTest] Вызов checkTestAndRedirectWithAPI...`);
+      addLog("info", "Вызов checkTestAndRedirectWithAPI...");
 
       // Временно отключаем автоматический переход для тестирования
       const testMode = true; // Установите в false, чтобы включить переходы
 
       if (testMode) {
-        console.log(
-          `[UniversalTest] ТЕСТОВЫЙ РЕЖИМ: автоматический переход отключен`
-        );
+        addLog("warning", "ТЕСТОВЫЙ РЕЖИМ: автоматический переход отключен");
 
         // Вызываем функцию завершения урока напрямую для тестирования
         const { checkTestAndRedirectWithAPI } = await import(
@@ -91,16 +112,12 @@ export default function UniversalTest({ moduleId, lessonId }) {
         const testRouter = {
           ...router,
           push: (url) => {
-            console.log(
-              `[UniversalTest] ТЕСТОВЫЙ РЕЖИМ: переход на ${url} заблокирован`
-            );
-            alert(
-              `Тест завершен! Переход на: ${url}\n\nПроверьте консоль для деталей API.`
-            );
+            addLog("info", `ТЕСТОВЫЙ РЕЖИМ: переход на ${url} заблокирован`);
             return Promise.resolve();
           },
         };
 
+        // Передаем функцию логирования в checkTestAndRedirectWithAPI
         await checkTestAndRedirectWithAPI({
           correctAnswers: testData.map((q) => q.correct),
           userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
@@ -108,6 +125,7 @@ export default function UniversalTest({ moduleId, lessonId }) {
           router: testRouter,
           telegramUser,
           timeSpentSeconds,
+          addLog, // Передаем функцию логирования
         });
       } else {
         // Обычный режим с переходами
@@ -118,20 +136,18 @@ export default function UniversalTest({ moduleId, lessonId }) {
           router,
           telegramUser,
           timeSpentSeconds,
+          addLog, // Передаем функцию логирования
         });
       }
 
-      console.log(
-        `[UniversalTest] checkTestAndRedirectWithAPI завершен успешно`
-      );
+      addLog("success", "checkTestAndRedirectWithAPI завершен успешно");
     } catch (error) {
-      console.error(
-        `[UniversalTest] Ошибка в checkTestAndRedirectWithAPI:`,
-        error
-      );
-      alert(
-        `Ошибка при завершении теста: ${error.message}\n\nПроверьте консоль для деталей.`
-      );
+      addLog("error", "Ошибка в checkTestAndRedirectWithAPI", {
+        message: error.message,
+        details: error.details,
+      });
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -251,6 +267,168 @@ export default function UniversalTest({ moduleId, lessonId }) {
           )}
         </div>
       </div>
+
+      {/* Панель логов */}
+      {showLogs && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0, 0, 0, 0.8)",
+            zIndex: 1000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "20px",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              borderRadius: "12px",
+              padding: "20px",
+              maxWidth: "90%",
+              maxHeight: "80%",
+              overflow: "auto",
+              width: "100%",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "20px",
+                borderBottom: "1px solid #eee",
+                paddingBottom: "10px",
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
+                Логи завершения теста
+              </h3>
+              <button
+                onClick={() => setShowLogs(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                  padding: "5px",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {isProcessing && (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: "20px",
+                  fontSize: "16px",
+                  color: "#666",
+                }}
+              >
+                Обработка теста...
+              </div>
+            )}
+
+            <div style={{ maxHeight: "400px", overflow: "auto" }}>
+              {logs.map((log, index) => (
+                <div
+                  key={index}
+                  style={{
+                    marginBottom: "15px",
+                    padding: "10px",
+                    borderRadius: "8px",
+                    backgroundColor:
+                      log.type === "error"
+                        ? "#ffebee"
+                        : log.type === "warning"
+                        ? "#fff3e0"
+                        : log.type === "success"
+                        ? "#e8f5e8"
+                        : "#f5f5f5",
+                    borderLeft: `4px solid ${
+                      log.type === "error"
+                        ? "#f44336"
+                        : log.type === "warning"
+                        ? "#ff9800"
+                        : log.type === "success"
+                        ? "#4caf50"
+                        : "#2196f3"
+                    }`,
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "5px",
+                    }}
+                  >
+                    <strong
+                      style={{
+                        color:
+                          log.type === "error"
+                            ? "#d32f2f"
+                            : log.type === "warning"
+                            ? "#f57c00"
+                            : log.type === "success"
+                            ? "#388e3c"
+                            : "#1976d2",
+                      }}
+                    >
+                      {log.type.toUpperCase()}
+                    </strong>
+                    <span style={{ fontSize: "12px", color: "#666" }}>
+                      {log.timestamp}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "14px", marginBottom: "5px" }}>
+                    {log.message}
+                  </div>
+                  {log.data && (
+                    <pre
+                      style={{
+                        fontSize: "12px",
+                        backgroundColor: "#f8f9fa",
+                        padding: "8px",
+                        borderRadius: "4px",
+                        overflow: "auto",
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                      }}
+                    >
+                      {log.data}
+                    </pre>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {!isProcessing && logs.length > 0 && (
+              <div
+                style={{
+                  textAlign: "center",
+                  marginTop: "20px",
+                  padding: "10px",
+                  backgroundColor: "#f0f0f0",
+                  borderRadius: "8px",
+                }}
+              >
+                <strong>Обработка завершена!</strong>
+                <br />
+                <small>Проверьте логи выше для диагностики проблем</small>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

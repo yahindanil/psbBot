@@ -124,22 +124,32 @@ export async function checkTestAndRedirectWithAPI({
   router,
   telegramUser,
   timeSpentSeconds = 300, // По умолчанию 5 минут
+  addLog = console.log, // Функция логирования, по умолчанию console.log
 }) {
-  console.log(`[checkTestAndRedirectWithAPI] Начало функции:`, {
+  const log = (type, message, data) => {
+    if (typeof addLog === "function") {
+      addLog(type, message, data);
+    } else {
+      console.log(`[${type.toUpperCase()}] ${message}`, data || "");
+    }
+  };
+
+  log("info", "Начало функции checkTestAndRedirectWithAPI", {
     correctAnswers,
     userAnswers,
     lessonUrl,
-    telegramUser,
+    telegramUser: telegramUser
+      ? { id: telegramUser.id, first_name: telegramUser.first_name }
+      : null,
     timeSpentSeconds,
   });
 
   // Проверяем результат теста
   const correctCount = correctAnswers.reduce((count, correct, index) => {
     const isCorrect = userAnswers[index] === correct;
-    console.log(
-      `[checkTestAndRedirectWithAPI] Вопрос ${
-        index + 1
-      }: правильный ответ ${correct}, ответ пользователя ${
+    log(
+      "info",
+      `Вопрос ${index + 1}: правильный ответ ${correct}, ответ пользователя ${
         userAnswers[index]
       }, корректно: ${isCorrect}`
     );
@@ -147,94 +157,100 @@ export async function checkTestAndRedirectWithAPI({
   }, 0);
 
   const isSuccess = correctCount === correctAnswers.length;
-  console.log(
-    `[checkTestAndRedirectWithAPI] Результат теста: ${correctCount}/${correctAnswers.length}, успешно: ${isSuccess}`
+  log(
+    "info",
+    `Результат теста: ${correctCount}/${correctAnswers.length}, успешно: ${isSuccess}`
   );
 
   // Если тест пройден успешно, отправляем результат в API
   if (isSuccess && telegramUser) {
     try {
       const lessonId = LESSON_URL_TO_ID_MAP[lessonUrl];
-      console.log(
-        `[checkTestAndRedirectWithAPI] Поиск lesson ID для URL ${lessonUrl}: ${lessonId}`
-      );
+      log("info", `Поиск lesson ID для URL ${lessonUrl}: ${lessonId}`);
 
       if (lessonId) {
-        console.log(
-          `[checkTestAndRedirectWithAPI] Отправка результата теста в API для урока ${lessonId}`
-        );
-        console.log(`[checkTestAndRedirectWithAPI] Параметры completeLesson:`, {
+        log("info", `Отправка результата теста в API для урока ${lessonId}`);
+        log("info", "Параметры completeLesson", {
           telegramId: telegramUser.id,
           lessonId,
           timeSpentSeconds,
         });
 
-        const result = await completeLesson(
+        // Создаем обертку для completeLesson с логированием
+        const { completeLesson } = await import("@/utils/api");
+
+        // Передаем функцию логирования в API
+        const result = await completeLessonWithLogging(
           telegramUser.id,
           lessonId,
-          timeSpentSeconds
+          timeSpentSeconds,
+          log
         );
 
-        console.log(
-          `[checkTestAndRedirectWithAPI] Урок успешно завершен:`,
-          result
-        );
+        log("success", `Урок успешно завершен`, result);
 
         // Если модуль также завершен, можем показать дополнительную информацию
         if (result.module_completed) {
-          console.log(
-            `[checkTestAndRedirectWithAPI] Модуль также завершен:`,
-            result.module
-          );
+          log("success", `Модуль также завершен`, result.module);
         }
       } else {
-        console.warn(
-          `[checkTestAndRedirectWithAPI] Lesson ID не найден для URL: ${lessonUrl}`
-        );
-        console.warn(
-          `[checkTestAndRedirectWithAPI] Доступные маппинги:`,
-          LESSON_URL_TO_ID_MAP
-        );
+        log("warning", `Lesson ID не найден для URL: ${lessonUrl}`);
+        log("warning", "Доступные маппинги", LESSON_URL_TO_ID_MAP);
       }
     } catch (error) {
-      console.error(
-        `[checkTestAndRedirectWithAPI] Ошибка отправки результата теста в API:`,
-        error
-      );
-      console.error(
-        `[checkTestAndRedirectWithAPI] Детали ошибки:`,
-        error.details
-      );
+      log("error", `Ошибка отправки результата теста в API`, {
+        message: error.message,
+        details: error.details,
+      });
       // Не блокируем пользователя, просто логируем ошибку
     }
   } else {
     if (!isSuccess) {
-      console.log(
-        `[checkTestAndRedirectWithAPI] Тест не пройден, API не вызывается`
-      );
+      log("info", `Тест не пройден, API не вызывается`);
     }
     if (!telegramUser) {
-      console.warn(
-        `[checkTestAndRedirectWithAPI] Данные пользователя недоступны, API не вызывается`
-      );
+      log("warning", `Данные пользователя недоступны, API не вызывается`);
     }
   }
 
   // Получаем модуль и урок из URL для удобства
   const { moduleId, lessonId: lessonIdFromUrl } = parseLessonUrl(lessonUrl);
-  console.log(
-    `[checkTestAndRedirectWithAPI] Парсинг URL: moduleId=${moduleId}, lessonId=${lessonIdFromUrl}`
-  );
+  log("info", `Парсинг URL: moduleId=${moduleId}, lessonId=${lessonIdFromUrl}`);
 
   if (isSuccess) {
-    console.log(`[checkTestAndRedirectWithAPI] Переход на страницу успеха`);
+    log("info", `Переход на страницу успеха`);
     router.push(`/all-modules/test-results/success?from=${lessonUrl}`);
   } else {
-    console.log(`[checkTestAndRedirectWithAPI] Переход на страницу неудачи`);
+    log("info", `Переход на страницу неудачи`);
     router.push(`/all-modules/test-results/fail?from=${lessonUrl}`);
   }
 
-  console.log(`[checkTestAndRedirectWithAPI] Функция завершена`);
+  log("info", `Функция завершена`);
+}
+
+// Обертка для completeLesson с логированием
+async function completeLessonWithLogging(
+  telegramId,
+  lessonId,
+  timeSpentSeconds,
+  log
+) {
+  const { completeLesson } = await import("@/utils/api");
+
+  log("info", "Вызов API completeLesson...");
+
+  try {
+    const result = await completeLesson(telegramId, lessonId, timeSpentSeconds);
+    log("success", "API completeLesson завершен успешно", result);
+    return result;
+  } catch (error) {
+    log("error", "Ошибка в API completeLesson", {
+      message: error.message,
+      details: error.details,
+      type: error.type,
+    });
+    throw error;
+  }
 }
 
 /**
