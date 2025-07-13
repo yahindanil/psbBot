@@ -8,18 +8,53 @@ if (typeof window !== "undefined") {
 }
 
 /**
+ * Проверяет доступность базового URL
+ * @returns {Promise<Object>} Результат проверки
+ */
+const checkBaseUrlConnectivity = async () => {
+  try {
+    const response = await fetch(API_BASE_URL, {
+      method: "GET",
+      mode: "cors",
+    });
+    return {
+      accessible: true,
+      status: response.status,
+      statusText: response.statusText,
+    };
+  } catch (error) {
+    return {
+      accessible: false,
+      error: error.message,
+    };
+  }
+};
+
+/**
  * Улучшенная функция для обработки ошибок API
  * @param {Error} error - Ошибка
  * @param {string} endpoint - Эндпоинт API
  * @param {Object} requestData - Данные запроса
+ * @param {Object} requestDetails - Детали запроса (URL, headers, etc.)
  * @returns {Error} Обогащенная ошибка
  */
-const enhanceApiError = (error, endpoint, requestData = null) => {
+const enhanceApiError = (
+  error,
+  endpoint,
+  requestData = null,
+  requestDetails = {}
+) => {
   const errorInfo = {
     timestamp: new Date().toISOString(),
     endpoint,
     baseUrl: API_BASE_URL,
+    fullUrl: requestDetails.fullUrl,
+    method: requestDetails.method || "UNKNOWN",
+    requestHeaders: requestDetails.headers || {},
     requestData,
+    responseStatus: requestDetails.responseStatus,
+    responseStatusText: requestDetails.responseStatusText,
+    responseHeaders: requestDetails.responseHeaders,
     originalError: error.message,
   };
 
@@ -48,34 +83,68 @@ const enhanceApiError = (error, endpoint, requestData = null) => {
 };
 
 /**
- * Создает или получает пользователя в базе данных
- * @param {Object} userData - Данные пользователя из Telegram
- * @param {number} userData.telegram_id - ID пользователя в Telegram
- * @param {string} userData.username - Username пользователя (может быть null)
- * @param {string} userData.first_name - Имя пользователя
- * @returns {Promise<Object>} Объект пользователя из БД
+ * Создает или получает пользователя
+ * @param {Object} userData - Данные пользователя
+ * @returns {Promise<Object>} Данные пользователя
  */
 export const createOrGetUser = async (userData) => {
   const endpoint = "/api/users"; // Возвращаем правильный эндпоинт согласно документации
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
+  // Проверяем доступность базового URL
+  const connectivity = await checkBaseUrlConnectivity();
+  console.log(`[API] Проверка доступности базового URL:`, connectivity);
+
+  const requestHeaders = {
+    "Content-Type": "application/json",
+  };
+
+  const requestBody = {
+    telegram_id: userData.telegram_id,
+    username: userData.username || null,
+    first_name: userData.first_name,
+  };
+
+  let requestDetails = {
+    fullUrl,
+    method: "POST",
+    headers: requestHeaders,
+  };
+
   try {
-    console.log(`[API] Запрос к ${fullUrl}`, userData);
+    console.log(`[API] Отправляем запрос:`, {
+      url: fullUrl,
+      method: "POST",
+      headers: requestHeaders,
+      body: requestBody,
+    });
 
     const response = await fetch(fullUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        telegram_id: userData.telegram_id,
-        username: userData.username || null,
-        first_name: userData.first_name,
-      }),
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody),
+    });
+
+    // Добавляем информацию о ответе
+    requestDetails.responseStatus = response.status;
+    requestDetails.responseStatusText = response.statusText;
+    requestDetails.responseHeaders = {};
+
+    // Собираем заголовки ответа
+    for (const [key, value] of response.headers.entries()) {
+      requestDetails.responseHeaders[key] = value;
+    }
+
+    console.log(`[API] Получен ответ:`, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: requestDetails.responseHeaders,
+      ok: response.ok,
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.log(`[API] Тело ошибки:`, errorText);
       throw new Error(`API Error ${response.status}: ${errorText}`);
     }
 
@@ -85,7 +154,12 @@ export const createOrGetUser = async (userData) => {
     // Согласно документации, возвращается объект пользователя напрямую
     return result;
   } catch (error) {
-    const enhancedError = enhanceApiError(error, endpoint, userData);
+    const enhancedError = enhanceApiError(
+      error,
+      endpoint,
+      userData,
+      requestDetails
+    );
     console.error(
       `[API] Ошибка создания/получения пользователя:`,
       enhancedError

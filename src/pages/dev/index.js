@@ -438,6 +438,107 @@ export default function DevPage() {
     setApiLogs([]);
   };
 
+  // Новые функции для тестирования эндпоинта /api/users
+  const [testResults, setTestResults] = useState(null);
+
+  const handleTestCreateUser = async () => {
+    if (!telegramUser) {
+      addLog("error", "Данные пользователя недоступны для теста создания");
+      return;
+    }
+
+    setIsApiLoading(true);
+    addLog("info", "Тестирование создания пользователя...");
+
+    try {
+      const userData = {
+        telegram_id: telegramUser.id,
+        username: telegramUser.username || null,
+        first_name: telegramUser.first_name,
+      };
+      addLog(
+        "info",
+        "Отправляемые данные для создания пользователя:",
+        userData
+      );
+
+      const result = await createOrGetUser(userData);
+      setTestResults(result);
+      addLog("success", "Тест создания пользователя завершен", result);
+    } catch (error) {
+      setTestResults({ error: error.message });
+      addLog("error", "Ошибка теста создания пользователя", error.message);
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
+
+  const handleTestUsersEndpoint = async () => {
+    if (!telegramUser) {
+      addLog("error", "Данные пользователя недоступны для теста эндпоинта");
+      return;
+    }
+
+    setIsApiLoading(true);
+    addLog("info", "Тестирование эндпоинта /api/users...");
+
+    try {
+      const result = await createOrGetUser({
+        telegram_id: telegramUser.id,
+        username: telegramUser.username || null,
+        first_name: telegramUser.first_name,
+      });
+      setTestResults(result);
+      addLog("success", "Тест эндпоинта /api/users завершен", result);
+    } catch (error) {
+      setTestResults({ error: error.message });
+      addLog("error", "Ошибка теста эндпоинта /api/users", error.message);
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
+
+  const handleTestBaseUrl = async () => {
+    setIsApiLoading(true);
+    addLog("info", "Тестирование базового URL...");
+
+    const baseUrl =
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
+    try {
+      const response = await fetch(baseUrl, {
+        method: "GET",
+        mode: "cors",
+      });
+
+      const result = {
+        url: baseUrl,
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: {},
+      };
+
+      // Собираем заголовки ответа
+      for (const [key, value] of response.headers.entries()) {
+        result.headers[key] = value;
+      }
+
+      setTestResults(result);
+      addLog("success", "Тест базового URL завершен", result);
+    } catch (error) {
+      const result = {
+        url: baseUrl,
+        error: error.message,
+        accessible: false,
+      };
+      setTestResults(result);
+      addLog("error", "Ошибка теста базового URL", error.message);
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
+
   return (
     <>
       <Head>
@@ -1222,6 +1323,115 @@ export default function DevPage() {
             </div>
           </div>
         </div>
+
+        <h2 style={{ marginTop: "30px", marginBottom: "20px" }}>
+          🔧 Инструменты разработчика
+        </h2>
+
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            onClick={handleRefreshData}
+            style={{
+              backgroundColor: "#4CAF50",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Обновить данные
+          </button>
+
+          <button
+            onClick={handleTestCreateUser}
+            style={{
+              backgroundColor: "#2196F3",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Тест создания пользователя
+          </button>
+
+          <button
+            onClick={() => window.open("/cors-test", "_blank")}
+            style={{
+              backgroundColor: "#FF9800",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Тест CORS и API
+          </button>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            onClick={handleTestUsersEndpoint}
+            style={{
+              backgroundColor: "#9C27B0",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              marginRight: "10px",
+            }}
+          >
+            Диагностика эндпоинта /api/users
+          </button>
+
+          <button
+            onClick={handleTestBaseUrl}
+            style={{
+              backgroundColor: "#795548",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Тест базового URL
+          </button>
+        </div>
+
+        {/* Результаты тестирования */}
+        {testResults && (
+          <div
+            style={{
+              backgroundColor: "#f8f9fa",
+              padding: "20px",
+              borderRadius: "8px",
+              marginBottom: "20px",
+              border: "1px solid #dee2e6",
+            }}
+          >
+            <h3>Результаты тестирования:</h3>
+            <pre
+              style={{
+                backgroundColor: "#ffffff",
+                padding: "10px",
+                borderRadius: "4px",
+                border: "1px solid #dee2e6",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+                fontSize: "12px",
+              }}
+            >
+              {JSON.stringify(testResults, null, 2)}
+            </pre>
+          </div>
+        )}
 
         <div style={{ marginTop: "30px", fontSize: "14px", color: "#666" }}>
           <p>

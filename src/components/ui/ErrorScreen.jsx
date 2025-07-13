@@ -48,6 +48,24 @@ export default function ErrorScreen({ error, onRetry, canRetry = true }) {
     };
   };
 
+  // Получение подробной информации о запросе
+  const getRequestInfo = (errorDetails) => {
+    if (!errorDetails) return null;
+
+    return {
+      url: errorDetails.fullUrl || errorDetails.baseUrl + errorDetails.endpoint,
+      method: errorDetails.method || "UNKNOWN",
+      endpoint: errorDetails.endpoint,
+      baseUrl: errorDetails.baseUrl,
+      requestHeaders: errorDetails.requestHeaders,
+      requestData: errorDetails.requestData,
+      responseStatus: errorDetails.responseStatus,
+      responseStatusText: errorDetails.responseStatusText,
+      responseHeaders: errorDetails.responseHeaders,
+      timestamp: errorDetails.timestamp,
+    };
+  };
+
   const errorAnalysis = analyzeError(error);
   const diagnosticInfo = getDiagnosticInfo();
 
@@ -233,7 +251,7 @@ export default function ErrorScreen({ error, onRetry, canRetry = true }) {
           </div>
 
           {errorAnalysis.details && (
-            <div>
+            <div style={{ marginBottom: "15px" }}>
               <strong>Детали ошибки:</strong>
               <pre
                 style={{
@@ -247,6 +265,59 @@ export default function ErrorScreen({ error, onRetry, canRetry = true }) {
               >
                 {JSON.stringify(errorAnalysis.details, null, 2)}
               </pre>
+            </div>
+          )}
+
+          {(() => {
+            const requestInfo = getRequestInfo(errorAnalysis.details);
+            if (requestInfo) {
+              return (
+                <div style={{ marginBottom: "15px" }}>
+                  <strong>Подробности запроса:</strong>
+                  <pre
+                    style={{
+                      backgroundColor: "#f8f9fa",
+                      padding: "8px",
+                      borderRadius: "4px",
+                      margin: "5px 0",
+                      whiteSpace: "pre-wrap",
+                      wordBreak: "break-word",
+                    }}
+                  >
+                    {JSON.stringify(requestInfo, null, 2)}
+                  </pre>
+                </div>
+              );
+            }
+            return null;
+          })()}
+
+          {errorAnalysis.details?.responseStatus && (
+            <div style={{ marginBottom: "15px" }}>
+              <strong>Анализ ответа:</strong>
+              <div style={{ 
+                backgroundColor: "#f8f9fa", 
+                padding: "8px", 
+                borderRadius: "4px", 
+                margin: "5px 0" 
+              }}>
+                <div>Статус: {errorAnalysis.details.responseStatus} {errorAnalysis.details.responseStatusText}</div>
+                {errorAnalysis.details.responseStatus === 404 && (
+                  <div style={{ color: "#d73527", marginTop: "5px" }}>
+                    ⚠️ Эндпоинт не найден на сервере. Возможные причины:
+                    <ul style={{ marginTop: "5px", paddingLeft: "20px" }}>
+                      <li>Неправильный URL эндпоинта</li>
+                      <li>Эндпоинт не реализован на сервере</li>
+                      <li>Неправильная конфигурация маршрутов</li>
+                    </ul>
+                  </div>
+                )}
+                {errorAnalysis.details.responseStatus >= 500 && (
+                  <div style={{ color: "#d73527", marginTop: "5px" }}>
+                    ⚠️ Ошибка сервера. Обратитесь к администратору.
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
