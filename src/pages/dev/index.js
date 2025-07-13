@@ -539,6 +539,194 @@ export default function DevPage() {
     }
   };
 
+  const handleTestLessonCompletion = async () => {
+    if (!telegramUser) {
+      addLog(
+        "error",
+        "Данные пользователя недоступны для теста завершения урока"
+      );
+      return;
+    }
+
+    setIsApiLoading(true);
+    addLog("info", "Тестирование завершения урока...");
+
+    try {
+      // Тестируем завершение первого урока
+      const lessonId = 1; // ID первого урока из LESSON_URL_TO_ID_MAP
+      const timeSpentSeconds = 300; // 5 минут
+
+      addLog(
+        "info",
+        `Тестируем завершение урока ID: ${lessonId} для пользователя ${telegramUser.id}`
+      );
+
+      const result = await completeLesson(
+        telegramUser.id,
+        lessonId,
+        timeSpentSeconds
+      );
+
+      setTestResults(result);
+      addLog("success", "Тест завершения урока успешен", result);
+
+      // Проверяем, что урок действительно завершен
+      addLog(
+        "info",
+        "Проверяем прогресс пользователя после завершения урока..."
+      );
+      const progress = await getUserProgress(telegramUser.id);
+      addLog("info", "Обновленный прогресс пользователя:", progress);
+    } catch (error) {
+      setTestResults({ error: error.message, details: error.details });
+      addLog("error", "Ошибка теста завершения урока", error.message);
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
+
+  const handleTestAllEndpoints = async () => {
+    if (!telegramUser) {
+      addLog("error", "Данные пользователя недоступны для полного теста API");
+      return;
+    }
+
+    setIsApiLoading(true);
+    addLog("info", "Тестирование всех API эндпоинтов...");
+
+    const testResults = {
+      endpoints: {},
+      summary: { total: 0, success: 0, failed: 0 },
+    };
+
+    // Тест 1: Создание/получение пользователя
+    try {
+      addLog("info", "Тест 1: POST /api/users");
+      const userResult = await createOrGetUser({
+        telegram_id: telegramUser.id,
+        username: telegramUser.username,
+        first_name: telegramUser.first_name,
+      });
+      testResults.endpoints["/api/users"] = {
+        status: "success",
+        data: userResult,
+      };
+      testResults.summary.success++;
+      addLog("success", "POST /api/users - успешно", userResult);
+    } catch (error) {
+      testResults.endpoints["/api/users"] = {
+        status: "error",
+        error: error.message,
+      };
+      testResults.summary.failed++;
+      addLog("error", "POST /api/users - ошибка", error.message);
+    }
+    testResults.summary.total++;
+
+    // Тест 2: Получение модулей
+    try {
+      addLog("info", "Тест 2: GET /api/modules");
+      const modulesResult = await getModules();
+      testResults.endpoints["/api/modules"] = {
+        status: "success",
+        data: modulesResult,
+      };
+      testResults.summary.success++;
+      addLog("success", "GET /api/modules - успешно", modulesResult);
+    } catch (error) {
+      testResults.endpoints["/api/modules"] = {
+        status: "error",
+        error: error.message,
+      };
+      testResults.summary.failed++;
+      addLog("error", "GET /api/modules - ошибка", error.message);
+    }
+    testResults.summary.total++;
+
+    // Тест 3: Получение прогресса пользователя
+    try {
+      addLog("info", "Тест 3: GET /api/users/{id}/progress");
+      const progressResult = await getUserProgress(telegramUser.id);
+      testResults.endpoints[`/api/users/${telegramUser.id}/progress`] = {
+        status: "success",
+        data: progressResult,
+      };
+      testResults.summary.success++;
+      addLog(
+        "success",
+        "GET /api/users/{id}/progress - успешно",
+        progressResult
+      );
+    } catch (error) {
+      testResults.endpoints[`/api/users/${telegramUser.id}/progress`] = {
+        status: "error",
+        error: error.message,
+      };
+      testResults.summary.failed++;
+      addLog("error", "GET /api/users/{id}/progress - ошибка", error.message);
+    }
+    testResults.summary.total++;
+
+    // Тест 4: Получение уроков модуля (если есть модули)
+    if (testResults.endpoints["/api/modules"]?.status === "success") {
+      try {
+        addLog("info", "Тест 4: GET /api/modules/{id}/lessons");
+        const lessonsResult = await getModuleLessons(1); // Тестируем первый модуль
+        testResults.endpoints["/api/modules/1/lessons"] = {
+          status: "success",
+          data: lessonsResult,
+        };
+        testResults.summary.success++;
+        addLog(
+          "success",
+          "GET /api/modules/1/lessons - успешно",
+          lessonsResult
+        );
+      } catch (error) {
+        testResults.endpoints["/api/modules/1/lessons"] = {
+          status: "error",
+          error: error.message,
+        };
+        testResults.summary.failed++;
+        addLog("error", "GET /api/modules/1/lessons - ошибка", error.message);
+      }
+      testResults.summary.total++;
+    }
+
+    // Тест 5: Завершение урока
+    try {
+      addLog("info", "Тест 5: POST /api/users/{id}/lessons/{id}/complete");
+      const completionResult = await completeLesson(telegramUser.id, 1, 300);
+      testResults.endpoints[
+        `/api/users/${telegramUser.id}/lessons/1/complete`
+      ] = { status: "success", data: completionResult };
+      testResults.summary.success++;
+      addLog(
+        "success",
+        "POST /api/users/{id}/lessons/{id}/complete - успешно",
+        completionResult
+      );
+    } catch (error) {
+      testResults.endpoints[
+        `/api/users/${telegramUser.id}/lessons/1/complete`
+      ] = { status: "error", error: error.message };
+      testResults.summary.failed++;
+      addLog(
+        "error",
+        "POST /api/users/{id}/lessons/{id}/complete - ошибка",
+        error.message
+      );
+    }
+    testResults.summary.total++;
+
+    setTestResults(testResults);
+    addLog(
+      "info",
+      `Тестирование завершено: ${testResults.summary.success}/${testResults.summary.total} эндпоинтов работают`
+    );
+    setIsApiLoading(false);
+  };
+
   return (
     <>
       <Head>
@@ -1402,6 +1590,38 @@ export default function DevPage() {
             }}
           >
             Тест базового URL
+          </button>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            onClick={handleTestLessonCompletion}
+            style={{
+              backgroundColor: "#E91E63",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Тест завершения урока
+          </button>
+        </div>
+
+        <div style={{ marginBottom: "20px" }}>
+          <button
+            onClick={handleTestAllEndpoints}
+            style={{
+              backgroundColor: "#007bff",
+              color: "white",
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Полный тест всех API эндпоинтов
           </button>
         </div>
 
