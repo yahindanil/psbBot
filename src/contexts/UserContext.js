@@ -98,11 +98,16 @@ export const UserProvider = ({ children }) => {
             isInitializing: false,
           }));
         } catch (error) {
-          log("Ошибка при работе с БД (тестовые данные)", error.message);
+          log("Ошибка при работе с БД (тестовые данные)", error);
+
+          // Создаем подробное описание ошибки
+          const errorMessage = error.type
+            ? `${error.type}: ${error.message}`
+            : error.message || "Неизвестная ошибка подключения";
 
           setState((prev) => ({
             ...prev,
-            error: error.message,
+            error: error, // Передаем весь объект ошибки для детального анализа
             isDbUserLoaded: true,
             isInitializing: false,
           }));
@@ -159,11 +164,11 @@ export const UserProvider = ({ children }) => {
               isInitializing: false,
             }));
           } catch (error) {
-            log("Ошибка при работе с БД", error.message);
+            log("Ошибка при работе с БД", error);
 
             setState((prev) => ({
               ...prev,
-              error: error.message,
+              error: error, // Передаем весь объект ошибки для детального анализа
               isDbUserLoaded: true,
               isInitializing: false,
             }));
@@ -224,11 +229,11 @@ export const UserProvider = ({ children }) => {
         error: null,
       }));
     } catch (error) {
-      log("Ошибка при повторной попытке работы с БД", error.message);
+      log("Ошибка при повторной попытке работы с БД", error);
 
       setState((prev) => ({
         ...prev,
-        error: error.message,
+        error: error, // Передаем весь объект ошибки для детального анализа
         isInitializing: false,
       }));
     }

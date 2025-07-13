@@ -1064,7 +1064,16 @@ export default function DevPage() {
         </div>
 
         {/* Переход к модулям */}
-        <div style={{ marginTop: "40px", textAlign: "center" }}>
+        <div
+          style={{
+            marginTop: "40px",
+            textAlign: "center",
+            display: "flex",
+            gap: "15px",
+            justifyContent: "center",
+            flexWrap: "wrap",
+          }}
+        >
           <Link
             href="/all-modules"
             style={{
@@ -1080,6 +1089,22 @@ export default function DevPage() {
             }}
           >
             Перейти к модулям
+          </Link>
+          <Link
+            href="/"
+            style={{
+              display: "inline-block",
+              backgroundColor: "#2196f3",
+              color: "white",
+              padding: "12px 24px",
+              borderRadius: "8px",
+              textDecoration: "none",
+              fontWeight: "bold",
+              fontSize: "16px",
+              transition: "background-color 0.3s",
+            }}
+          >
+            🏠 Главная
           </Link>
         </div>
       </div>

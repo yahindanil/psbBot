@@ -8,6 +8,46 @@ if (typeof window !== "undefined") {
 }
 
 /**
+ * Улучшенная функция для обработки ошибок API
+ * @param {Error} error - Ошибка
+ * @param {string} endpoint - Эндпоинт API
+ * @param {Object} requestData - Данные запроса
+ * @returns {Error} Обогащенная ошибка
+ */
+const enhanceApiError = (error, endpoint, requestData = null) => {
+  const errorInfo = {
+    timestamp: new Date().toISOString(),
+    endpoint,
+    baseUrl: API_BASE_URL,
+    requestData,
+    originalError: error.message,
+  };
+
+  // Определяем тип ошибки
+  let errorType = "UNKNOWN_ERROR";
+  let userMessage = "Неизвестная ошибка";
+
+  if (error.name === "TypeError" && error.message.includes("Failed to fetch")) {
+    errorType = "NETWORK_ERROR";
+    userMessage = "Ошибка сети - не удалось подключиться к серверу";
+  } else if (error.message.includes("API Error")) {
+    errorType = "API_ERROR";
+    userMessage = error.message;
+  } else if (error.name === "AbortError") {
+    errorType = "TIMEOUT_ERROR";
+    userMessage = "Превышено время ожидания ответа";
+  }
+
+  const enhancedError = new Error(userMessage);
+  enhancedError.type = errorType;
+  enhancedError.details = errorInfo;
+
+  console.error(`[API] ${errorType}:`, errorInfo);
+
+  return enhancedError;
+};
+
+/**
  * Создает или получает пользователя в базе данных
  * @param {Object} userData - Данные пользователя из Telegram
  * @param {number} userData.telegram_id - ID пользователя в Telegram
@@ -16,8 +56,13 @@ if (typeof window !== "undefined") {
  * @returns {Promise<Object>} Объект пользователя из БД
  */
 export const createOrGetUser = async (userData) => {
+  const endpoint = "/api/users";
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
   try {
-    const response = await fetch(`${API_BASE_URL}/api/users`, {
+    console.log(`[API] Запрос к ${fullUrl}`, userData);
+
+    const response = await fetch(fullUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,10 +80,15 @@ export const createOrGetUser = async (userData) => {
     }
 
     const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
     return result;
   } catch (error) {
-    console.error("Ошибка создания/получения пользователя:", error);
-    throw error;
+    const enhancedError = enhanceApiError(error, endpoint, userData);
+    console.error(
+      `[API] Ошибка создания/получения пользователя:`,
+      enhancedError
+    );
+    throw enhancedError;
   }
 };
 
@@ -48,10 +98,13 @@ export const createOrGetUser = async (userData) => {
  * @returns {Promise<Object>} Прогресс пользователя
  */
 export const getUserProgress = async (telegramId) => {
+  const endpoint = `/api/users/${telegramId}/progress`;
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/users/${telegramId}/progress`
-    );
+    console.log(`[API] Запрос к ${fullUrl}`);
+
+    const response = await fetch(fullUrl);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -59,10 +112,15 @@ export const getUserProgress = async (telegramId) => {
     }
 
     const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
     return result;
   } catch (error) {
-    console.error("Ошибка получения прогресса пользователя:", error);
-    throw error;
+    const enhancedError = enhanceApiError(error, endpoint, { telegramId });
+    console.error(
+      `[API] Ошибка получения прогресса пользователя:`,
+      enhancedError
+    );
+    throw enhancedError;
   }
 };
 
@@ -78,19 +136,22 @@ export const completeLesson = async (
   lessonId,
   timeSpentSeconds = 0
 ) => {
+  const endpoint = `/api/users/${telegramId}/lessons/${lessonId}/complete`;
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const requestData = { telegramId, lessonId, timeSpentSeconds };
+  
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/users/${telegramId}/lessons/${lessonId}/complete`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          time_spent_seconds: timeSpentSeconds,
-        }),
-      }
-    );
+    console.log(`[API] Запрос к ${fullUrl}`, requestData);
+    
+    const response = await fetch(fullUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        time_spent_seconds: timeSpentSeconds,
+      }),
+    });
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -98,10 +159,12 @@ export const completeLesson = async (
     }
 
     const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
     return result;
   } catch (error) {
-    console.error("Ошибка завершения урока:", error);
-    throw error;
+    const enhancedError = enhanceApiError(error, endpoint, requestData);
+    console.error(`[API] Ошибка завершения урока:`, enhancedError);
+    throw enhancedError;
   }
 };
 
