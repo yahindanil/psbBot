@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
@@ -38,7 +38,7 @@ export default function DevPage() {
   const [completingLessons, setCompletingLessons] = useState(new Set());
 
   // Функция для добавления лога
-  const addLog = (type, message, data = null) => {
+  const addLog = useCallback((type, message, data = null) => {
     const timestamp = new Date().toLocaleTimeString();
     setApiLogs((prev) => [
       ...prev,
@@ -49,10 +49,10 @@ export default function DevPage() {
         data: data ? JSON.stringify(data, null, 2) : null,
       },
     ]);
-  };
+  }, []);
 
   // Загрузка всех модулей и их уроков
-  const loadAllModulesAndLessons = async () => {
+  const loadAllModulesAndLessons = useCallback(async () => {
     setIsLoadingModules(true);
     addLog("info", "Загрузка всех модулей и уроков...");
 
@@ -103,10 +103,10 @@ export default function DevPage() {
     } finally {
       setIsLoadingModules(false);
     }
-  };
+  }, [addLog]);
 
   // Загрузка прогресса пользователя
-  const loadUserProgress = async () => {
+  const loadUserProgress = useCallback(async () => {
     if (!telegramUser) return;
 
     setIsLoadingProgress(true);
@@ -122,7 +122,7 @@ export default function DevPage() {
     } finally {
       setIsLoadingProgress(false);
     }
-  };
+  }, [telegramUser, addLog]);
 
   // Завершение конкретного урока
   const handleCompleteLessonById = async (moduleId, lessonId, lessonName) => {
@@ -171,7 +171,12 @@ export default function DevPage() {
       loadAllModulesAndLessons();
       loadUserProgress();
     }
-  }, [telegramUser]);
+  }, [
+    telegramUser,
+    allModules.length,
+    loadAllModulesAndLessons,
+    loadUserProgress,
+  ]);
 
   // Функция для ручного вызова API (дополнительно к автоматическому)
   const handleManualApiCall = async () => {

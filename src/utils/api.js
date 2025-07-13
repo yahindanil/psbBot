@@ -247,9 +247,9 @@ export const initializeBasicData = async () => {
 
     const createdModules = [];
     for (const moduleData of modules) {
-      const module = await createModule(moduleData);
-      createdModules.push(module);
-      console.log(`[API] Создан модуль: ${module.name}`);
+      const createdModule = await createModule(moduleData);
+      createdModules.push(createdModule);
+      console.log(`[API] Создан модуль: ${createdModule.name}`);
     }
 
     // Создаем уроки для каждого модуля
