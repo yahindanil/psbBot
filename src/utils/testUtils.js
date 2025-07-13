@@ -19,6 +19,73 @@ const LESSON_URL_TO_ID_MAP = {
   "/all-modules/module-4/lesson-4": 14,
 };
 
+// Структура модулей и уроков для навигации
+const LESSON_STRUCTURE = {
+  "module-1": ["lesson-1", "lesson-2", "lesson-3", "lesson-4"],
+  "module-2": ["lesson-1", "lesson-2"],
+  "module-3": ["lesson-1", "lesson-2", "lesson-3", "lesson-4"],
+  "module-4": ["lesson-1", "lesson-2", "lesson-3", "lesson-4"],
+};
+
+/**
+ * Парсит URL урока и возвращает moduleId и lessonId
+ * @param {string} lessonUrl - URL урока (например, "/all-modules/module-1/lesson-1")
+ * @returns {Object} - {moduleId: 'module-1', lessonId: 'lesson-1'}
+ */
+export function parseLessonUrl(lessonUrl) {
+  const match = lessonUrl.match(/\/all-modules\/(module-\d+)\/(lesson-\d+)/);
+  if (match) {
+    return {
+      moduleId: match[1],
+      lessonId: match[2],
+    };
+  }
+  return null;
+}
+
+/**
+ * Находит следующий урок
+ * @param {string} lessonUrl - URL текущего урока
+ * @returns {string|null} - URL следующего урока или null если это последний урок
+ */
+export function getNextLessonUrl(lessonUrl) {
+  const parsed = parseLessonUrl(lessonUrl);
+  if (!parsed) return null;
+
+  const { moduleId, lessonId } = parsed;
+  const lessons = LESSON_STRUCTURE[moduleId];
+
+  if (!lessons) return null;
+
+  const currentIndex = lessons.indexOf(lessonId);
+  if (currentIndex === -1) return null;
+
+  // Если есть следующий урок в том же модуле
+  if (currentIndex < lessons.length - 1) {
+    return `/all-modules/${moduleId}/${lessons[currentIndex + 1]}`;
+  }
+
+  // Если это последний урок в модуле, переходим к первому уроку следующего модуля
+  const moduleNumber = parseInt(moduleId.split("-")[1]);
+  const nextModuleId = `module-${moduleNumber + 1}`;
+
+  if (LESSON_STRUCTURE[nextModuleId]) {
+    return `/all-modules/${nextModuleId}/${LESSON_STRUCTURE[nextModuleId][0]}`;
+  }
+
+  // Если это последний урок последнего модуля, возвращаем null
+  return null;
+}
+
+/**
+ * Получает URL теста для урока
+ * @param {string} lessonUrl - URL урока
+ * @returns {string} - URL теста
+ */
+export function getTestUrlFromLessonUrl(lessonUrl) {
+  return `${lessonUrl}/test`;
+}
+
 /**
  * Проверяет ответы теста и перенаправляет на страницу результатов (базовая функция)
  */
@@ -90,13 +157,20 @@ export async function checkTestAndRedirectWithAPI({
     }
   }
 
-  // Перенаправляем на страницу результатов
+  // Получаем модуль и урок из URL для удобства
+  const parsed = parseLessonUrl(lessonUrl);
+  const queryParams = {
+    from: lessonUrl,
+    ...(parsed && { module: parsed.moduleId, lesson: parsed.lessonId }),
+  };
+
+  // Перенаправляем на страницу результатов с расширенными параметрами
   const resultPage = isSuccess
     ? "/all-modules/test-results/success"
     : "/all-modules/test-results/fail";
   router.push({
     pathname: resultPage,
-    query: { from: lessonUrl },
+    query: queryParams,
   });
 }
 

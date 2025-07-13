@@ -7,9 +7,39 @@ import { getUserProgress } from "@/utils/api";
 export default function Profile() {
   const [userProgress, setUserProgress] = useState(null);
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+  const [showCopyPopup, setShowCopyPopup] = useState(false);
 
   // Получаем данные пользователя из контекста
   const { telegramUser } = useUser();
+
+  // Функция копирования ссылки
+  const handleInviteFriends = async () => {
+    const inviteLink = "https://t.me/junior_blago_bot";
+
+    try {
+      await navigator.clipboard.writeText(inviteLink);
+      setShowCopyPopup(true);
+
+      // Скрываем попап через 2 секунды
+      setTimeout(() => {
+        setShowCopyPopup(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Ошибка копирования:", error);
+      // Fallback для старых браузеров
+      const textArea = document.createElement("textarea");
+      textArea.value = inviteLink;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textArea);
+
+      setShowCopyPopup(true);
+      setTimeout(() => {
+        setShowCopyPopup(false);
+      }, 2000);
+    }
+  };
 
   // Загружаем прогресс пользователя
   useEffect(() => {
@@ -107,6 +137,23 @@ export default function Profile() {
 
   return (
     <div className="bg-white min-h-screen">
+      {/* Попап с уведомлением о копировании */}
+      {showCopyPopup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-[15px] px-[30px] py-[20px] mx-[20px] text-center shadow-lg">
+            <div className="text-[16px] font-semibold text-[#283B41] mb-[10px]">
+              Ссылка скопирована!
+            </div>
+            <div className="text-[14px] text-[#666] mb-[15px]">
+              Теперь вы можете поделиться ей с друзьями
+            </div>
+            <div className="text-[12px] text-[#749484] bg-[#F5ECDA] rounded-[8px] px-[10px] py-[5px]">
+              https://t.me/junior_blago_bot
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="container-without-padding text-center">
         <div className="h-[326px] bg-[#749484] rounded-b-[15px] pt-[30px] pl-[16px] pr-[16px]">
           <Link
@@ -209,6 +256,7 @@ export default function Profile() {
             <button
               className="w-full bg-[#DFB57F] rounded-[30px] text-[14px] font-semibold text-black mt-2 hover:opacity-90 min-w-[260px] h-[42px] flex items-center justify-center"
               type="button"
+              onClick={handleInviteFriends}
             >
               Пригласить друзей
             </button>

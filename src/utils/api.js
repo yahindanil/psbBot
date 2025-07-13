@@ -1,5 +1,11 @@
-// Базовый URL для API
-const API_BASE_URL = "http://localhost:8000";
+// Базовый URL для API - используем переменную окружения
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+
+// Проверяем корректность URL при инициализации
+if (typeof window !== "undefined") {
+  console.log(`[API] Используется API Base URL: ${API_BASE_URL}`);
+}
 
 /**
  * Создает или получает пользователя в базе данных

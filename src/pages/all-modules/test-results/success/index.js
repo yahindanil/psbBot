@@ -1,8 +1,30 @@
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
+import { getNextLessonUrl } from "@/utils/testUtils";
 
 export default function Success() {
+  const router = useRouter();
+  const [nextLessonUrl, setNextLessonUrl] = useState("/all-modules");
+  const [isLastLesson, setIsLastLesson] = useState(false);
+
+  useEffect(() => {
+    const { from } = router.query;
+    if (from) {
+      const nextUrl = getNextLessonUrl(from);
+      if (nextUrl) {
+        setNextLessonUrl(nextUrl);
+        setIsLastLesson(false);
+      } else {
+        // Если это последний урок (module-4/lesson-4), переходим в профиль
+        setNextLessonUrl("/profile");
+        setIsLastLesson(true);
+      }
+    }
+  }, [router.query]);
+
   return (
     <div className="min-h-screen bg-[#749484]">
       <div className="container bg-[#749484] text-center relative">
@@ -40,12 +62,12 @@ export default function Success() {
           <br />
           Тест успешно пройден
         </h1>
-        <Link href="/all-modules">
+        <Link href={nextLessonUrl}>
           <Button
             className="w-[260px] text-[16px] py-[13px] text-[#283B41] font-semibold rounded-full"
             color="#F5ECDA"
           >
-            К следующему уроку
+            {isLastLesson ? "В профиль" : "К следующему уроку"}
           </Button>
         </Link>
       </div>
