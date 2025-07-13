@@ -225,6 +225,45 @@ export const createLesson = async (lessonData) => {
 };
 
 /**
+ * Фильтрует дубликаты модулей, оставляя только самые новые для каждого order_index
+ * @param {Array} modules - Массив модулей
+ * @returns {Array} Отфильтрованный массив модулей
+ */
+const filterDuplicateModules = (modules) => {
+  if (!Array.isArray(modules)) return [];
+
+  const modulesByOrder = {};
+
+  // Группируем модули по order_index
+  modules.forEach((module) => {
+    const orderIndex = module.order_index;
+    if (!modulesByOrder[orderIndex]) {
+      modulesByOrder[orderIndex] = [];
+    }
+    modulesByOrder[orderIndex].push(module);
+  });
+
+  // Для каждого order_index берем самый новый модуль (по created_at)
+  const filteredModules = [];
+  for (const orderIndex in modulesByOrder) {
+    const modulesForOrder = modulesByOrder[orderIndex];
+
+    // Сортируем по дате создания (самый новый первым)
+    modulesForOrder.sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+
+    // Берем самый новый
+    filteredModules.push(modulesForOrder[0]);
+  }
+
+  // Сортируем по order_index
+  filteredModules.sort((a, b) => a.order_index - b.order_index);
+
+  return filteredModules;
+};
+
+/**
  * Получает список всех модулей
  * @returns {Promise<Array>} Список модулей
  */
@@ -238,6 +277,16 @@ export const getModules = async () => {
     }
 
     const result = await response.json();
+
+    // Фильтруем дубликаты на фронтенде
+    if (result.modules) {
+      const filteredModules = filterDuplicateModules(result.modules);
+      console.log(
+        `[API] Отфильтровано ${result.modules.length} -> ${filteredModules.length} модулей`
+      );
+      return { ...result, modules: filteredModules };
+    }
+
     return result;
   } catch (error) {
     console.error("Ошибка получения модулей:", error);
@@ -279,9 +328,25 @@ export const initializeBasicData = async () => {
 
     // Проверяем есть ли уже модули
     const existingModules = await getModules();
-    if (existingModules.modules && existingModules.modules.length > 0) {
+    if (existingModules.modules && existingModules.modules.length >= 4) {
       console.log("[API] Модули уже существуют, пропускаем инициализацию");
-      return;
+      console.log(`[API] Найдено модулей: ${existingModules.modules.length}`);
+
+      // Проверяем что есть модули с order_index 1, 2, 3, 4
+      const requiredOrders = [1, 2, 3, 4];
+      const existingOrders = existingModules.modules.map((m) => m.order_index);
+      const missingOrders = requiredOrders.filter(
+        (order) => !existingOrders.includes(order)
+      );
+
+      if (missingOrders.length === 0) {
+        console.log("[API] Все необходимые модули найдены");
+        return;
+      } else {
+        console.log(
+          `[API] Отсутствуют модули с order_index: ${missingOrders.join(", ")}`
+        );
+      }
     }
 
     // Создаем модули
