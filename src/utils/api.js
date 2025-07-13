@@ -144,13 +144,13 @@ export const completeLesson = async (
     console.log(`[API] Запрос к ${fullUrl}`, requestData);
     
     const response = await fetch(fullUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        time_spent_seconds: timeSpentSeconds,
-      }),
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          time_spent_seconds: timeSpentSeconds,
+        }),
     });
 
     if (!response.ok) {
