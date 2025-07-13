@@ -139,18 +139,18 @@ export const completeLesson = async (
   const endpoint = `/api/users/${telegramId}/lessons/${lessonId}/complete`;
   const fullUrl = `${API_BASE_URL}${endpoint}`;
   const requestData = { telegramId, lessonId, timeSpentSeconds };
-  
+
   try {
     console.log(`[API] Запрос к ${fullUrl}`, requestData);
-    
+
     const response = await fetch(fullUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          time_spent_seconds: timeSpentSeconds,
-        }),
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        time_spent_seconds: timeSpentSeconds,
+      }),
     });
 
     if (!response.ok) {
@@ -279,7 +279,7 @@ export const initializeBasicData = async () => {
 
     // Проверяем есть ли уже модули
     const existingModules = await getModules();
-    if (existingModules.length > 0) {
+    if (existingModules.modules && existingModules.modules.length > 0) {
       console.log("[API] Модули уже существуют, пропускаем инициализацию");
       return;
     }

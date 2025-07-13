@@ -60,7 +60,7 @@ export default function DevPage() {
       // Получаем модули
       const modulesResponse = await getModules();
 
-      if (!modulesResponse || modulesResponse.length === 0) {
+      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
         addLog("warning", "Модули не найдены. Инициализируйте данные.");
         setAllModules([]);
         return;
@@ -69,7 +69,7 @@ export default function DevPage() {
       // Для каждого модуля получаем его уроки
       const modulesWithLessons = [];
 
-      for (const moduleItem of modulesResponse) {
+      for (const moduleItem of modulesResponse.modules) {
         addLog("info", `Загрузка уроков модуля: ${moduleItem.name}`);
 
         try {
@@ -77,7 +77,7 @@ export default function DevPage() {
 
           modulesWithLessons.push({
             ...moduleItem,
-            lessons: lessonsResponse || [],
+            lessons: lessonsResponse.lessons || lessonsResponse || [],
           });
         } catch (error) {
           addLog(
@@ -177,6 +177,64 @@ export default function DevPage() {
     loadAllModulesAndLessons,
     loadUserProgress,
   ]);
+
+  // Функция для очистки дублирующихся модулей
+  const handleCleanupModules = async () => {
+    setIsApiLoading(true);
+    addLog("info", "Очистка дублирующихся модулей...");
+
+    try {
+      // Получаем все модули
+      const modulesResponse = await getModules();
+
+      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
+        addLog("info", "Модули не найдены, очистка не требуется");
+        return;
+      }
+
+      const modules = modulesResponse.modules;
+      addLog("info", `Найдено ${modules.length} модулей`);
+
+      // Группируем модули по order_index
+      const modulesByOrder = {};
+      modules.forEach((module) => {
+        if (!modulesByOrder[module.order_index]) {
+          modulesByOrder[module.order_index] = [];
+        }
+        modulesByOrder[module.order_index].push(module);
+      });
+
+      // Находим дубликаты
+      let duplicatesFound = 0;
+      for (const orderIndex in modulesByOrder) {
+        const modulesForOrder = modulesByOrder[orderIndex];
+        if (modulesForOrder.length > 1) {
+          duplicatesFound += modulesForOrder.length - 1;
+          addLog(
+            "warning",
+            `Найдено ${modulesForOrder.length} дубликатов для order_index ${orderIndex}`
+          );
+        }
+      }
+
+      if (duplicatesFound === 0) {
+        addLog("success", "Дубликаты не найдены");
+      } else {
+        addLog(
+          "info",
+          `Найдено ${duplicatesFound} дубликатов. Для очистки нужно обратиться к бекендеру.`
+        );
+        addLog(
+          "info",
+          "Рекомендация: добавить уникальный индекс на поле order_index в БД"
+        );
+      }
+    } catch (error) {
+      addLog("error", "Ошибка очистки модулей", error.message);
+    } finally {
+      setIsApiLoading(false);
+    }
+  };
 
   // Диагностическая функция для проверки формата данных API
   const handleApiDiagnostic = async () => {
@@ -303,13 +361,15 @@ export default function DevPage() {
       addLog("info", "Получение списка модулей...");
       const modulesResponse = await getModules();
 
-      if (!modulesResponse || modulesResponse.length === 0) {
+      if (!modulesResponse.modules || modulesResponse.modules.length === 0) {
         addLog("error", "Модули не найдены. Сначала инициализируйте данные.");
         return;
       }
 
       // Находим первый модуль (с order_index = 1)
-      const firstModule = modulesResponse.find((m) => m.order_index === 1);
+      const firstModule = modulesResponse.modules.find(
+        (m) => m.order_index === 1
+      );
       if (!firstModule) {
         addLog("error", "Первый модуль не найден");
         return;
@@ -324,13 +384,19 @@ export default function DevPage() {
       addLog("info", "Получение уроков первого модуля...");
       const lessonsResponse = await getModuleLessons(firstModule.id);
 
-      if (!lessonsResponse || lessonsResponse.length === 0) {
+      if (!lessonsResponse.lessons && !Array.isArray(lessonsResponse)) {
+        addLog("error", "Уроки в первом модуле не найдены");
+        return;
+      }
+
+      const lessons = lessonsResponse.lessons || lessonsResponse;
+      if (!lessons || lessons.length === 0) {
         addLog("error", "Уроки в первом модуле не найдены");
         return;
       }
 
       // Находим первый урок
-      const firstLesson = lessonsResponse.find((l) => l.order_index === 1);
+      const firstLesson = lessons.find((l) => l.order_index === 1);
       if (!firstLesson) {
         addLog("error", "Первый урок не найден");
         return;
@@ -900,11 +966,51 @@ export default function DevPage() {
                 cursor: !isInitializingData ? "pointer" : "not-allowed",
                 fontSize: "14px",
                 marginTop: "10px",
+                marginRight: "10px",
               }}
             >
               {isInitializingData
                 ? "Инициализация..."
                 : "Инициализировать данные"}
+            </button>
+
+            <button
+              onClick={handleApiDiagnostic}
+              disabled={!telegramUser || isApiLoading}
+              style={{
+                backgroundColor:
+                  telegramUser && !isApiLoading ? "#17a2b8" : "#ccc",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "5px",
+                cursor:
+                  telegramUser && !isApiLoading ? "pointer" : "not-allowed",
+                fontSize: "14px",
+                marginTop: "10px",
+                marginRight: "10px",
+              }}
+            >
+              {isApiLoading ? "Диагностика..." : "Диагностика формата API"}
+            </button>
+
+            <button
+              onClick={handleCleanupModules}
+              disabled={!telegramUser || isApiLoading}
+              style={{
+                backgroundColor:
+                  telegramUser && !isApiLoading ? "#dc3545" : "#ccc",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "5px",
+                cursor:
+                  telegramUser && !isApiLoading ? "pointer" : "not-allowed",
+                fontSize: "14px",
+                marginTop: "10px",
+              }}
+            >
+              {isApiLoading ? "Проверка..." : "Проверить дубликаты"}
             </button>
           </div>
 
@@ -1000,9 +1106,29 @@ export default function DevPage() {
                   telegramUser && !isApiLoading ? "pointer" : "not-allowed",
                 fontSize: "14px",
                 marginTop: "10px",
+                marginRight: "10px",
               }}
             >
               {isApiLoading ? "Отправка..." : "Ручной вызов API"}
+            </button>
+
+            <button
+              onClick={handleApiDiagnostic}
+              disabled={!telegramUser || isApiLoading}
+              style={{
+                backgroundColor:
+                  telegramUser && !isApiLoading ? "#17a2b8" : "#ccc",
+                color: "white",
+                border: "none",
+                padding: "10px 20px",
+                borderRadius: "5px",
+                cursor:
+                  telegramUser && !isApiLoading ? "pointer" : "not-allowed",
+                fontSize: "14px",
+                marginTop: "10px",
+              }}
+            >
+              {isApiLoading ? "Диагностика..." : "Диагностика API"}
             </button>
 
             {!telegramUser && (
