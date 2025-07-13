@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useUser } from "@/contexts/UserContext";
 import {
   createOrGetUser,
-  initializeBasicData,
+  getUserProgress,
   completeLesson,
   getModules,
   getModuleLessons,
-  getUserProgress,
 } from "@/utils/api";
 
 export default function DevPage() {
@@ -425,22 +424,19 @@ export default function DevPage() {
     }
   };
 
-  // Функция для инициализации базовых данных
-  const handleInitializeData = async () => {
+  // Функция для обновления данных (без создания модулей)
+  const handleRefreshData = async () => {
     setIsInitializingData(true);
-    addLog("info", "Инициализация базовых данных (модули и уроки)...");
+    addLog("info", "Обновление данных (загрузка модулей и прогресса)...");
 
     try {
-      await initializeBasicData();
-      addLog("success", "Базовые данные успешно инициализированы!");
-
-      // Перезагружаем модули после инициализации
       await loadAllModulesAndLessons();
       if (telegramUser) {
         await loadUserProgress();
       }
+      addLog("success", "Данные успешно обновлены!");
     } catch (error) {
-      addLog("error", "Ошибка инициализации данных", error.message);
+      addLog("error", "Ошибка обновления данных", error.message);
     } finally {
       setIsInitializingData(false);
     }
@@ -937,7 +933,7 @@ export default function DevPage() {
         <div style={{ marginTop: "30px" }}>
           <h2>Тестирование API</h2>
 
-          {/* Инициализация данных */}
+          {/* Обновление данных */}
           <div
             style={{
               backgroundColor: "#e8f5e8",
@@ -947,15 +943,15 @@ export default function DevPage() {
               marginBottom: "20px",
             }}
           >
-            <h3>Инициализация базовых данных</h3>
-            <p>Создание модулей и уроков в базе данных</p>
+            <h3>Обновление данных</h3>
+            <p>Загрузка модулей и прогресса пользователя с сервера</p>
             <p style={{ fontSize: "14px", color: "#666" }}>
-              <strong>Сначала нажмите эту кнопку</strong> чтобы создать модули и
-              уроки в БД.
+              <strong>Примечание:</strong> Модули должны быть заранее созданы на
+              бекенде.
             </p>
 
             <button
-              onClick={handleInitializeData}
+              onClick={handleRefreshData}
               disabled={isInitializingData}
               style={{
                 backgroundColor: !isInitializingData ? "#4caf50" : "#ccc",
@@ -969,9 +965,7 @@ export default function DevPage() {
                 marginRight: "10px",
               }}
             >
-              {isInitializingData
-                ? "Инициализация..."
-                : "Инициализировать данные"}
+              {isInitializingData ? "Обновление..." : "Обновить данные"}
             </button>
 
             <button

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { createOrGetUser, initializeBasicData } from "@/utils/api";
+import { createOrGetUser } from "@/utils/api";
 
 const UserContext = createContext();
 
@@ -78,9 +78,6 @@ export const UserProvider = ({ children }) => {
 
         // Автоматически создаем/получаем пользователя в БД с тестовыми данными
         try {
-          log("Инициализация базовых данных (модули и уроки)...");
-          await initializeBasicData();
-
           log("Создание/получение тестового пользователя в БД...");
 
           const dbUserData = await createOrGetUser({
@@ -144,9 +141,6 @@ export const UserProvider = ({ children }) => {
 
           // Автоматически создаем/получаем пользователя в БД
           try {
-            log("Инициализация базовых данных (модули и уроки)...");
-            await initializeBasicData();
-
             log("Создание/получение пользователя в БД...");
 
             const dbUserData = await createOrGetUser({
