@@ -61,14 +61,78 @@ export default function UniversalTest({ moduleId, lessonId }) {
     const timeSpentSeconds = Math.floor((Date.now() - testStartTime) / 1000);
     const lessonUrl = `/all-modules/${moduleId}/${lessonId}`;
 
-    await checkTestAndRedirectWithAPI({
-      correctAnswers: testData.map((q) => q.correct),
-      userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
+    console.log(`[UniversalTest] Начало завершения теста:`, {
+      moduleId,
+      lessonId,
       lessonUrl,
-      router,
-      telegramUser,
       timeSpentSeconds,
+      telegramUser,
+      userAnswers,
+      correctAnswers: testData.map((q) => q.correct),
     });
+
+    try {
+      console.log(`[UniversalTest] Вызов checkTestAndRedirectWithAPI...`);
+
+      // Временно отключаем автоматический переход для тестирования
+      const testMode = true; // Установите в false, чтобы включить переходы
+
+      if (testMode) {
+        console.log(
+          `[UniversalTest] ТЕСТОВЫЙ РЕЖИМ: автоматический переход отключен`
+        );
+
+        // Вызываем функцию завершения урока напрямую для тестирования
+        const { checkTestAndRedirectWithAPI } = await import(
+          "@/utils/testUtils"
+        );
+
+        // Создаем модифицированный router, который не переходит
+        const testRouter = {
+          ...router,
+          push: (url) => {
+            console.log(
+              `[UniversalTest] ТЕСТОВЫЙ РЕЖИМ: переход на ${url} заблокирован`
+            );
+            alert(
+              `Тест завершен! Переход на: ${url}\n\nПроверьте консоль для деталей API.`
+            );
+            return Promise.resolve();
+          },
+        };
+
+        await checkTestAndRedirectWithAPI({
+          correctAnswers: testData.map((q) => q.correct),
+          userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
+          lessonUrl,
+          router: testRouter,
+          telegramUser,
+          timeSpentSeconds,
+        });
+      } else {
+        // Обычный режим с переходами
+        await checkTestAndRedirectWithAPI({
+          correctAnswers: testData.map((q) => q.correct),
+          userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
+          lessonUrl,
+          router,
+          telegramUser,
+          timeSpentSeconds,
+        });
+      }
+
+      console.log(
+        `[UniversalTest] checkTestAndRedirectWithAPI завершен успешно`
+      );
+    } catch (error) {
+      console.error(
+        `[UniversalTest] Ошибка в checkTestAndRedirectWithAPI:`,
+        error
+      );
+      alert(
+        `Ошибка при завершении теста: ${error.message}\n\nПроверьте консоль для деталей.`
+      );
+    }
   };
 
   // Если данные еще не загружены

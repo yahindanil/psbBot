@@ -242,22 +242,52 @@ export const completeLesson = async (
   const endpoint = `/api/users/${telegramId}/lessons/${lessonId}/complete`;
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
   const requestData = { telegramId, lessonId, timeSpentSeconds };
+  const requestHeaders = {
+    "Content-Type": "application/json",
+  };
+  const requestBody = {
+    time_spent_seconds: timeSpentSeconds,
+  };
+
+  let requestDetails = {
+    fullUrl,
+    method: "POST",
+    headers: requestHeaders,
+  };
 
   try {
-    console.log(`[API] Запрос к ${fullUrl}`, requestData);
+    console.log(`[API] Запрос к ${fullUrl}`, {
+      requestData,
+      requestBody,
+      headers: requestHeaders,
+    });
 
     const response = await fetch(fullUrl, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        time_spent_seconds: timeSpentSeconds,
-      }),
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody),
+    });
+
+    // Добавляем информацию о ответе
+    requestDetails.responseStatus = response.status;
+    requestDetails.responseStatusText = response.statusText;
+    requestDetails.responseHeaders = {};
+
+    // Собираем заголовки ответа
+    for (const [key, value] of response.headers.entries()) {
+      requestDetails.responseHeaders[key] = value;
+    }
+
+    console.log(`[API] Получен ответ:`, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: requestDetails.responseHeaders,
+      ok: response.ok,
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.log(`[API] Тело ошибки:`, errorText);
       throw new Error(`API Error ${response.status}: ${errorText}`);
     }
 
@@ -265,7 +295,12 @@ export const completeLesson = async (
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
     return result;
   } catch (error) {
-    const enhancedError = enhanceApiError(error, endpoint, requestData);
+    const enhancedError = enhanceApiError(
+      error,
+      endpoint,
+      requestData,
+      requestDetails
+    );
     console.error(`[API] Ошибка завершения урока:`, enhancedError);
     throw enhancedError;
   }

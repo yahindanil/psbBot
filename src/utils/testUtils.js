@@ -125,53 +125,116 @@ export async function checkTestAndRedirectWithAPI({
   telegramUser,
   timeSpentSeconds = 300, // По умолчанию 5 минут
 }) {
-  const isSuccess = correctAnswers.every(
-    (ans, idx) => ans === userAnswers[idx]
+  console.log(`[checkTestAndRedirectWithAPI] Начало функции:`, {
+    correctAnswers,
+    userAnswers,
+    lessonUrl,
+    telegramUser,
+    timeSpentSeconds,
+  });
+
+  // Проверяем результат теста
+  const correctCount = correctAnswers.reduce((count, correct, index) => {
+    const isCorrect = userAnswers[index] === correct;
+    console.log(
+      `[checkTestAndRedirectWithAPI] Вопрос ${
+        index + 1
+      }: правильный ответ ${correct}, ответ пользователя ${
+        userAnswers[index]
+      }, корректно: ${isCorrect}`
+    );
+    return count + (isCorrect ? 1 : 0);
+  }, 0);
+
+  const isSuccess = correctCount === correctAnswers.length;
+  console.log(
+    `[checkTestAndRedirectWithAPI] Результат теста: ${correctCount}/${correctAnswers.length}, успешно: ${isSuccess}`
   );
 
   // Если тест пройден успешно, отправляем результат в API
   if (isSuccess && telegramUser) {
     try {
       const lessonId = LESSON_URL_TO_ID_MAP[lessonUrl];
+      console.log(
+        `[checkTestAndRedirectWithAPI] Поиск lesson ID для URL ${lessonUrl}: ${lessonId}`
+      );
 
       if (lessonId) {
-        console.log(`Отправка результата теста в API для урока ${lessonId}`);
+        console.log(
+          `[checkTestAndRedirectWithAPI] Отправка результата теста в API для урока ${lessonId}`
+        );
+        console.log(`[checkTestAndRedirectWithAPI] Параметры completeLesson:`, {
+          telegramId: telegramUser.id,
+          lessonId,
+          timeSpentSeconds,
+        });
+
         const result = await completeLesson(
           telegramUser.id,
           lessonId,
           timeSpentSeconds
         );
 
-        console.log("Урок успешно завершен:", result);
+        console.log(
+          `[checkTestAndRedirectWithAPI] Урок успешно завершен:`,
+          result
+        );
 
         // Если модуль также завершен, можем показать дополнительную информацию
         if (result.module_completed) {
-          console.log("Модуль также завершен:", result.module);
+          console.log(
+            `[checkTestAndRedirectWithAPI] Модуль также завершен:`,
+            result.module
+          );
         }
       } else {
-        console.warn(`Lesson ID не найден для URL: ${lessonUrl}`);
+        console.warn(
+          `[checkTestAndRedirectWithAPI] Lesson ID не найден для URL: ${lessonUrl}`
+        );
+        console.warn(
+          `[checkTestAndRedirectWithAPI] Доступные маппинги:`,
+          LESSON_URL_TO_ID_MAP
+        );
       }
     } catch (error) {
-      console.error("Ошибка отправки результата теста в API:", error);
+      console.error(
+        `[checkTestAndRedirectWithAPI] Ошибка отправки результата теста в API:`,
+        error
+      );
+      console.error(
+        `[checkTestAndRedirectWithAPI] Детали ошибки:`,
+        error.details
+      );
       // Не блокируем пользователя, просто логируем ошибку
+    }
+  } else {
+    if (!isSuccess) {
+      console.log(
+        `[checkTestAndRedirectWithAPI] Тест не пройден, API не вызывается`
+      );
+    }
+    if (!telegramUser) {
+      console.warn(
+        `[checkTestAndRedirectWithAPI] Данные пользователя недоступны, API не вызывается`
+      );
     }
   }
 
   // Получаем модуль и урок из URL для удобства
-  const parsed = parseLessonUrl(lessonUrl);
-  const queryParams = {
-    from: lessonUrl,
-    ...(parsed && { module: parsed.moduleId, lesson: parsed.lessonId }),
-  };
+  const { moduleId, lessonId: lessonIdFromUrl } = parseLessonUrl(lessonUrl);
+  console.log(
+    `[checkTestAndRedirectWithAPI] Парсинг URL: moduleId=${moduleId}, lessonId=${lessonIdFromUrl}`
+  );
 
-  // Перенаправляем на страницу результатов с расширенными параметрами
-  const resultPage = isSuccess
-    ? "/all-modules/test-results/success"
-    : "/all-modules/test-results/fail";
-  router.push({
-    pathname: resultPage,
-    query: queryParams,
-  });
+  if (isSuccess) {
+    console.log(`[checkTestAndRedirectWithAPI] Переход на страницу успеха`);
+    router.push(`/all-modules/test-results/success?from=${lessonUrl}`);
+  } else {
+    console.log(`[checkTestAndRedirectWithAPI] Переход на страницу неудачи`);
+    router.push(`/all-modules/test-results/fail?from=${lessonUrl}`);
+  }
+
+  console.log(`[checkTestAndRedirectWithAPI] Функция завершена`);
 }
 
 /**
