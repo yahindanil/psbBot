@@ -295,13 +295,18 @@ export default function ErrorScreen({ error, onRetry, canRetry = true }) {
           {errorAnalysis.details?.responseStatus && (
             <div style={{ marginBottom: "15px" }}>
               <strong>Анализ ответа:</strong>
-              <div style={{ 
-                backgroundColor: "#f8f9fa", 
-                padding: "8px", 
-                borderRadius: "4px", 
-                margin: "5px 0" 
-              }}>
-                <div>Статус: {errorAnalysis.details.responseStatus} {errorAnalysis.details.responseStatusText}</div>
+              <div
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  padding: "8px",
+                  borderRadius: "4px",
+                  margin: "5px 0",
+                }}
+              >
+                <div>
+                  Статус: {errorAnalysis.details.responseStatus}{" "}
+                  {errorAnalysis.details.responseStatusText}
+                </div>
                 {errorAnalysis.details.responseStatus === 404 && (
                   <div style={{ color: "#d73527", marginTop: "5px" }}>
                     ⚠️ Эндпоинт не найден на сервере. Возможные причины:

@@ -244,83 +244,16 @@ export default function AllModules() {
           </Link>
         </header>
 
-        {/* Уведомление о режиме разработки */}
-        {isLocalDevelopment && (
-          <div className="mx-4 mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-sm">
-            <div className="font-bold mb-1 text-yellow-800">
-              🛠 РЕЖИМ РАЗРАБОТКИ
-            </div>
-            <div className="text-yellow-700">
-              Тестовый пользователь: {telegramUser?.first_name}{" "}
-              {telegramUser?.last_name}
-            </div>
-          </div>
-        )}
-
-        {/* Debug информация для разработки */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="mx-4 mb-4 p-3 bg-blue-100 rounded-lg text-sm">
-            <div className="font-bold mb-1">Информация о пользователе:</div>
-            <div>Telegram ID: {telegramUser?.id}</div>
-            <div>
-              Имя: {telegramUser?.first_name} {telegramUser?.last_name}
-            </div>
-            <div>Username: @{telegramUser?.username}</div>
-            <div>БД ID: {dbUser?.id}</div>
-            <div>Локальная разработка: {isLocalDevelopment ? "Да" : "Нет"}</div>
-            {userStats && (
-              <div>
-                <div className="font-bold mt-2 mb-1">Статистика:</div>
-                <div>
-                  Завершено уроков: {userStats.completed_lessons || 0}/14
-                </div>
-                <div>
-                  Завершено модулей: {userStats.completed_modules || 0}/4
-                </div>
-                <div>Прогресс уроков: {userStats.lessons_percentage || 0}%</div>
-                <div>
-                  Прогресс модулей: {userStats.modules_percentage || 0}%
-                </div>
-                <div>
-                  Среднее время: {userStats.average_lesson_time || 0} сек
-                </div>
-                <div className="font-bold mt-2 mb-1">Состояние модулей:</div>
-                <div>
-                  Модуль 1: {getModuleStatus(1)} (
-                  {isModuleCompleted(1) ? "✅" : "❌"}) | Модуль 2:{" "}
-                  {getModuleStatus(2)} ({isModuleCompleted(2) ? "✅" : "❌"}) |
-                  Модуль 3: {getModuleStatus(3)} (
-                  {isModuleCompleted(3) ? "✅" : "❌"}) | Модуль 4:{" "}
-                  {getModuleStatus(4)} ({isModuleCompleted(4) ? "✅" : "❌"})
-                </div>
-                <div className="font-bold mt-2 mb-1">
-                  Состояние уроков (первые 4):
-                </div>
-                <div>
-                  Урок 1: {getLessonStatus(1)} (
-                  {isLessonCompleted(1) ? "✅" : "❌"}) | Урок 2:{" "}
-                  {getLessonStatus(2)} ({isLessonCompleted(2) ? "✅" : "❌"}) |
-                  Урок 3: {getLessonStatus(3)} (
-                  {isLessonCompleted(3) ? "✅" : "❌"}) | Урок 4:{" "}
-                  {getLessonStatus(4)} ({isLessonCompleted(4) ? "✅" : "❌"})
-                </div>
-                <div>Выбранный модуль: {selectedModule}</div>
-              </div>
-            )}
-          </div>
-        )}
-
         <main>
           <div
             className="mb-[30px] overflow-x-auto"
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             <div
-              className="flex gap-[15px] pl-[16px] pr-[16px]"
+              className="flex gap-[15px] pl-[16px] pr-[16px] modules-scroll"
               style={{
                 minWidth: "100%",
                 overflowX: "auto",
-                scrollbarWidth: "none",
               }}
             >
               <ModuleCard
@@ -361,8 +294,36 @@ export default function AllModules() {
               />
             </div>
             <style jsx>{`
-              .flex::-webkit-scrollbar {
-                display: none;
+              /* Скрываем скроллбар на мобильных устройствах */
+              @media (max-width: 768px) {
+                .modules-scroll {
+                  scrollbar-width: none;
+                }
+                .modules-scroll::-webkit-scrollbar {
+                  display: none;
+                }
+              }
+
+              /* Показываем скроллбар на десктопе */
+              @media (min-width: 769px) {
+                .modules-scroll {
+                  scrollbar-width: thin;
+                  scrollbar-color: #749484 #f5ecda;
+                }
+                .modules-scroll::-webkit-scrollbar {
+                  height: 8px;
+                }
+                .modules-scroll::-webkit-scrollbar-track {
+                  background: #f5ecda;
+                  border-radius: 4px;
+                }
+                .modules-scroll::-webkit-scrollbar-thumb {
+                  background: #749484;
+                  border-radius: 4px;
+                }
+                .modules-scroll::-webkit-scrollbar-thumb:hover {
+                  background: #5a7a6a;
+                }
               }
             `}</style>
           </div>

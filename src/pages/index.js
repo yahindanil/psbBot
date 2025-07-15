@@ -53,32 +53,7 @@ export default function Home() {
 
   return (
     <div className="container text-center">
-      {/* Уведомление о режиме разработки */}
-      {isLocalDevelopment && (
-        <div className="mx-4 mb-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-sm">
-          <div className="font-bold mb-1 text-yellow-800">
-            🛠 РЕЖИМ РАЗРАБОТКИ
-          </div>
-          <div className="text-yellow-700">
-            Используются тестовые данные: {telegramUser?.first_name}{" "}
-            {telegramUser?.last_name}
-          </div>
-        </div>
-      )}
 
-      {/* Debug информация для разработки */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="mx-4 mb-4 p-3 bg-blue-100 rounded-lg text-sm">
-          <div className="font-bold mb-1">Информация о пользователе:</div>
-          <div>Telegram ID: {telegramUser?.id}</div>
-          <div>
-            Имя: {telegramUser?.first_name} {telegramUser?.last_name}
-          </div>
-          <div>Username: @{telegramUser?.username}</div>
-          <div>БД ID: {dbUser?.id}</div>
-          <div>Локальная разработка: {isLocalDevelopment ? "Да" : "Нет"}</div>
-        </div>
-      )}
 
       <p className="text-[14px] mb-[9px]">Бесплатный курс</p>
       <h1 className="mb-[9px]">

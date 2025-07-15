@@ -155,17 +155,11 @@ export default function UniversalTest({ moduleId, lessonId }) {
       <header className="relative flex items-center mb-[20px] min-h-[25px] pl-[16px] pr-[16px]">
         <div className="bg-[#749484] rounded-[30px] px-[15px] py-[5px] text-white text-[14px] mx-auto mb-[61px]">
           Тест
-          {/* Показываем таймер в development режиме */}
-          {process.env.NODE_ENV === "development" && lessonTimer && (
-            <span className="ml-2 text-xs opacity-75">
-              ⏱ {lessonTimer.formattedTime}
-            </span>
-          )}
         </div>
       </header>
       <div
         className={`relative flex-1 rounded-t-[15px] pr-[20px] pt-[20px] pb-[50px] pl-[16px] flex flex-col bg-[#DFB57F] text-black`}
-        style={{ height: "calc(100vh - 132px)" }}
+        style={{ minHeight: "calc(100vh - 132px)" }}
       >
         {/* Картинка Артёма */}
         <div
@@ -269,21 +263,6 @@ export default function UniversalTest({ moduleId, lessonId }) {
             </button>
           )}
         </div>
-
-        {/* Debug информация в development режиме */}
-        {process.env.NODE_ENV === "development" && lessonTimer && (
-          <div className="mt-4 p-2 bg-blue-100 rounded text-xs text-blue-800">
-            <div>
-              Таймер: {lessonTimer.formattedTime} (
-              {lessonTimer.getElapsedSeconds()}с)
-            </div>
-            <div>
-              Статус: {lessonTimer.isActive ? "Активен" : "Неактивен"}{" "}
-              {lessonTimer.isPaused ? "(Пауза)" : ""}
-            </div>
-            <div>Урок ID: {numericLessonId}</div>
-          </div>
-        )}
       </div>
     </div>
   );

@@ -51,38 +51,7 @@ export default function LessonWithTimer({
     return child;
   });
 
-  return (
-    <>
-      {childrenWithTimer}
-
-      {/* Debug информация */}
-      {(showDebugInfo || process.env.NODE_ENV === "development") &&
-        lessonTimer && (
-          <div
-            style={{
-              position: "fixed",
-              top: "10px",
-              right: "10px",
-              background: "rgba(0, 0, 0, 0.8)",
-              color: "white",
-              padding: "8px",
-              borderRadius: "4px",
-              fontSize: "12px",
-              zIndex: 1000,
-              maxWidth: "200px",
-            }}
-          >
-            <div>🕒 {lessonTimer.formattedTime}</div>
-            <div>📚 Урок {numericLessonId}</div>
-            <div>
-              {lessonTimer.isActive ? "▶️" : "⏸️"}
-              {lessonTimer.isActive ? "Активен" : "Неактивен"}
-              {lessonTimer.isPaused ? " (Пауза)" : ""}
-            </div>
-          </div>
-        )}
-    </>
-  );
+  return <>{childrenWithTimer}</>;
 }
 
 /**

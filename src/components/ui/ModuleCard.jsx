@@ -30,16 +30,16 @@ const ModuleCard = ({
           priority
         />
         {locked && (
-        <Image
-          src="/svgs/Lock.svg"
-          alt="Lock Icon"
-          width={16.13}
-          height={22}
-          priority
-        />
+          <Image
+            src="/svgs/Lock.svg"
+            alt="Lock Icon"
+            width={16.13}
+            height={22}
+            priority
+          />
         )}
       </div>
-      <div>
+      <div className="w-[183px] leading-[1.2]">
         <h3 className="text-[16px] font-bold">{title}</h3>
         <p>{text}</p>
       </div>

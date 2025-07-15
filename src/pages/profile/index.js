@@ -132,8 +132,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="bg-white min-h-screen">
-      <div className="container-without-padding text-center pb-8">
+    <div className="bg-white h-screen overflow-y-auto">
+      <div className="container-without-padding text-center pb-8 min-h-full">
         <div className="h-[326px] bg-[#749484] rounded-b-[15px] pt-[30px] pl-[16px] pr-[16px]">
           <Link
             href="/all-modules"
@@ -212,7 +212,7 @@ export default function Profile() {
               </div>
             </div>
           </div>
-          <div className="rounded-[15px] bg-[#F5ECDA] px-[14px] pt-[14px] pb-[15px] flex flex-col items-center w-full max-w-[400px] mx-auto">
+          <div className="rounded-[15px] bg-[#F5ECDA] mb-[15px] px-[14px] pt-[14px] pb-[15px] flex flex-col items-center w-full max-w-[400px] mx-auto">
             <div className="flex items-center w-full mb-2">
               <Image
                 src="/images/personal account/Artem winking.png"
@@ -240,31 +240,6 @@ export default function Profile() {
               {isLinkCopied ? "Ссылка скопирована" : "Пригласить друзей"}
             </button>
           </div>
-
-          {/* Debug информация для разработки */}
-          {process.env.NODE_ENV === "development" && userStats && (
-            <div className="mt-4 p-3 bg-blue-100 rounded-lg text-sm text-left">
-              <div className="font-bold mb-1 text-blue-800">
-                Debug информация:
-              </div>
-              <div className="text-blue-700 space-y-1">
-                <div>
-                  Уроки: {userStats.completed_lessons}/{userStats.total_lessons}{" "}
-                  ({userStats.lessons_percentage}%)
-                </div>
-                <div>
-                  Модули: {userStats.completed_modules}/
-                  {userStats.total_modules} ({userStats.modules_percentage}%)
-                </div>
-                <div>
-                  Среднее время: {userStats.average_lesson_time} сек (
-                  {averageTime.text})
-                </div>
-                <div>Telegram ID: {telegramUser?.id}</div>
-                <div>БД ID: {dbUser?.id}</div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
