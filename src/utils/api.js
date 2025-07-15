@@ -2,77 +2,6 @@
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://212.34.143.198:8000";
 
-// URL вебхука Botmother
-const BOTMOTHER_WEBHOOK_URL =
-  "https://app.botmother.com/api/bot/action/LWjF-r9vH/DFDBB3BKCNB8BxeDLX-CQBaC1COBzBwBWCYDlBDxBVqDGClC2BUDFDsB8BEeBLcD";
-
-// Маппинг уроков к их названиям
-const LESSON_TITLES = {
-  1: "Почему деньги не берутся из воздуха",
-  2: "Зачем ставить финансовые цели",
-  3: "Почему деньги теряют ценность",
-  4: "Как инвестиции помогают достичь целей",
-  5: "Что можно назвать инвестициями, а что не стоит",
-  6: "Что такое инвестиционные инструменты",
-  7: "Что такое акции и как они работают",
-  8: "Облигации: как они работают и чем отличаются от акций",
-  9: "ПИФ — как инвестировать во всё сразу",
-  10: "Доходность и риск — как они связаны",
-  11: "Как начать инвестировать самостоятельно",
-  12: "Как инвестировать с помощью готовых решений",
-  13: "Что такое диверсификация и зачем она нужна",
-  14: "С чего начать: первые шаги в инвестициях",
-};
-
-/**
- * Отправляет уведомление о завершении урока в Botmother
- * @param {number} telegramId - ID пользователя в Telegram
- * @param {number} lessonId - ID урока (от 1 до 14)
- * @returns {Promise<void>}
- */
-const sendLessonCompletionWebhook = async (telegramId, lessonId) => {
-  try {
-    const lessonTitle = LESSON_TITLES[lessonId] || `Урок ${lessonId}`;
-
-    const webhookData = {
-      platform: "tg",
-      users: [telegramId.toString()],
-      data: {
-        lesson_id: lessonId,
-        lesson_title: lessonTitle,
-        completion_time: new Date().toISOString(),
-      },
-    };
-
-    console.log(
-      `[BOTMOTHER] Отправка вебхука для урока ${lessonId}:`,
-      webhookData
-    );
-
-    const response = await fetch(BOTMOTHER_WEBHOOK_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(webhookData),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`[BOTMOTHER] Ошибка отправки вебхука:`, {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText,
-      });
-    } else {
-      console.log(`[BOTMOTHER] Вебхук успешно отправлен для урока ${lessonId}`);
-    }
-  } catch (error) {
-    // Не блокируем основной процесс при ошибке вебхука
-    console.error(`[BOTMOTHER] Ошибка при отправке вебхука:`, error);
-  }
-};
-
 // Функция для нормализации URL (убирает двойные слэши)
 const normalizeUrl = (baseUrl, endpoint) => {
   // Убираем завершающий слэш из базового URL
@@ -413,10 +342,6 @@ export const updateUserAverageTime = async (telegramId, averageTime) => {
 
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
-
-    // Отправляем вебхук в Botmother о завершении урока
-    await sendLessonCompletionWebhook(telegramId, lessonId);
-
     return result;
   } catch (error) {
     const enhancedError = enhanceApiError(
