@@ -168,38 +168,12 @@ export default function UniversalTest({ moduleId, lessonId }) {
         }
       };
 
-      // Создаем модифицированный router для тестового режима
-      const finalRouter = testMode
-        ? {
-            ...router,
-            push: (url) => {
-              addLog("info", `Переход на ${url}`, { url });
-
-              // В dev режиме показываем диалог перед переходом
-              if (testMode) {
-                setTimeout(() => {
-                  const shouldNavigate = confirm(
-                    `Переход на ${url}. Продолжить?`
-                  );
-                  if (shouldNavigate) {
-                    window.location.href = url;
-                  }
-                }, 1000);
-              } else {
-                return router.push(url);
-              }
-
-              return Promise.resolve();
-            },
-          }
-        : router;
-
       // Вызываем улучшенную функцию с таймером
       await checkTestWithTimer({
         correctAnswers: testData.map((q) => q.correct),
         userAnswers: userAnswers.map((a) => (a ? a.answer : null)),
         lessonUrl,
-        router: finalRouter,
+        router,
         telegramUser,
         lessonTimer, // Передаем объект таймера
         onLessonCompleted,

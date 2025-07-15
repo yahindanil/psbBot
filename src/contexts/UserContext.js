@@ -300,6 +300,15 @@ export const UserProvider = ({ children }) => {
     return Boolean(state.dbUser[moduleField]);
   };
 
+  // Вспомогательная функция для определения модуля урока
+  const getLessonModule = (lessonId) => {
+    if (lessonId >= 1 && lessonId <= 4) return 1;
+    if (lessonId >= 5 && lessonId <= 6) return 2;
+    if (lessonId >= 7 && lessonId <= 10) return 3;
+    if (lessonId >= 11 && lessonId <= 14) return 4;
+    return null;
+  };
+
   // Функция для получения статуса урока (открыт/закрыт/пройден)
   const getLessonStatus = (lessonId) => {
     if (!state.dbUser) return "locked";
@@ -309,14 +318,18 @@ export const UserProvider = ({ children }) => {
       return "completed";
     }
 
-    // Первый урок всегда открыт
-    if (lessonId === 1) {
+    // Определяем модуль урока
+    const lessonModule = getLessonModule(lessonId);
+    if (!lessonModule) return "locked";
+
+    // Первый модуль всегда открыт целиком
+    if (lessonModule === 1) {
       return "open";
     }
 
-    // Для остальных уроков проверяем, пройден ли предыдущий
-    const prevLessonCompleted = isLessonCompleted(lessonId - 1);
-    return prevLessonCompleted ? "open" : "locked";
+    // Для остальных модулей проверяем, завершен ли предыдущий модуль
+    const prevModuleCompleted = isModuleCompleted(lessonModule - 1);
+    return prevModuleCompleted ? "open" : "locked";
   };
 
   // Функция для получения статуса модуля
