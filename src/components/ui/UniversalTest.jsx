@@ -135,7 +135,7 @@ export default function UniversalTest({ moduleId, lessonId }) {
   // Если данные еще не загружены
   if (!testData) {
     return (
-      <div className="container-without-padding pt-[20px] pb-8 min-h-screen">
+      <div className="container-without-padding pt-[20px] min-h-screen">
         <div className="flex items-center justify-center h-full">
           <div className="text-center">
             <div className="text-gray-600 mb-2">Загрузка теста...</div>
@@ -151,7 +151,7 @@ export default function UniversalTest({ moduleId, lessonId }) {
   }
 
   return (
-    <div className="container-without-padding pt-[20px] pb-8 min-h-screen">
+    <div className="container-without-padding pt-[20px] min-h-screen">
       <header className="relative flex items-center mb-[20px] min-h-[25px] pl-[16px] pr-[16px]">
         <div className="bg-[#749484] rounded-[30px] px-[15px] py-[5px] text-white text-[14px] mx-auto mb-[61px]">
           Тест
