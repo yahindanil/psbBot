@@ -2,44 +2,27 @@ import Link from "next/link";
 import Image from "next/image";
 import ModuleCard from "@/components/ui/ModuleCard";
 import LessonCard from "@/components/ui/LessonCard";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { getUserProgress } from "@/utils/api";
 
 export default function AllModules() {
   const [selectedModule, setSelectedModule] = useState(1);
-  const [userProgress, setUserProgress] = useState(null);
-  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
 
   // Получаем данные пользователя из контекста
-  const { telegramUser, dbUser, isLocalDevelopment } = useUser();
-
-  // Загружаем прогресс пользователя
-  useEffect(() => {
-    const fetchUserProgress = async () => {
-      if (!telegramUser?.id) return;
-
-      try {
-        setIsLoadingProgress(true);
-        console.log(
-          `[AllModules] Загрузка прогресса для пользователя ${telegramUser.id}...`
-        );
-
-        const progress = await getUserProgress(telegramUser.id);
-        setUserProgress(progress);
-
-        console.log("[AllModules] Прогресс пользователя получен:", progress);
-      } catch (error) {
-        console.error("[AllModules] Ошибка загрузки прогресса:", error);
-        // Устанавливаем пустой прогресс для показа базового состояния
-        setUserProgress({ modules: [], stats: { completed_lessons: 0 } });
-      } finally {
-        setIsLoadingProgress(false);
-      }
-    };
-
-    fetchUserProgress();
-  }, [telegramUser?.id]);
+  const {
+    telegramUser,
+    dbUser,
+    userStats,
+    isLocalDevelopment,
+    isReady,
+    hasError,
+    error,
+    retryDbUser,
+    getLessonStatus,
+    getModuleStatus,
+    isLessonCompleted,
+    isModuleCompleted,
+  } = useUser();
 
   // Базовые данные уроков (статичные метаданные)
   const lessonsByModule = {
@@ -51,6 +34,7 @@ export default function AllModules() {
         title: "Урок 1",
         text: "Почему деньги не берутся из воздуха",
         href: "/all-modules/module-1/lesson-1",
+        lessonId: 1,
       },
       {
         imageSrc: "/images/start page and modules page/module 1/1-2.svg",
@@ -59,6 +43,7 @@ export default function AllModules() {
         title: "Урок 2",
         text: "Зачем ставить финансовые цели",
         href: "/all-modules/module-1/lesson-2",
+        lessonId: 2,
       },
       {
         imageSrc: "/images/start page and modules page/module 1/1-3.svg",
@@ -67,6 +52,7 @@ export default function AllModules() {
         title: "Урок 3",
         text: "Почему деньги теряют ценность",
         href: "/all-modules/module-1/lesson-3",
+        lessonId: 3,
       },
       {
         imageSrc: "/images/start page and modules page/module 1/1-4.svg",
@@ -75,6 +61,7 @@ export default function AllModules() {
         title: "Урок 4",
         text: "Как инвестиции помогают достичь целей",
         href: "/all-modules/module-1/lesson-4",
+        lessonId: 4,
       },
     ],
     2: [
@@ -85,6 +72,7 @@ export default function AllModules() {
         title: "Урок 1",
         text: "Что можно назвать инвестициями, а что не стоит",
         href: "/all-modules/module-2/lesson-1",
+        lessonId: 5,
       },
       {
         imageSrc: "/images/start page and modules page/module 2/2-2(1).svg",
@@ -93,6 +81,7 @@ export default function AllModules() {
         title: "Урок 2",
         text: "Что такое инвестиционные инструменты",
         href: "/all-modules/module-2/lesson-2",
+        lessonId: 6,
       },
     ],
     3: [
@@ -103,6 +92,7 @@ export default function AllModules() {
         title: "Урок 1",
         text: "Что такое акции и как они работают",
         href: "/all-modules/module-3/lesson-1",
+        lessonId: 7,
       },
       {
         imageSrc: "/images/start page and modules page/module 3/3-2(1).svg",
@@ -111,6 +101,7 @@ export default function AllModules() {
         title: "Урок 2",
         text: "Облигации: как они работают и чем отличаются от акций",
         href: "/all-modules/module-3/lesson-2",
+        lessonId: 8,
       },
       {
         imageSrc: "/images/start page and modules page/module 3/3-3(1).svg",
@@ -119,6 +110,7 @@ export default function AllModules() {
         title: "Урок 3",
         text: "ПИФ — как инвестировать во всё сразу",
         href: "/all-modules/module-3/lesson-3",
+        lessonId: 9,
       },
       {
         imageSrc: "/images/start page and modules page/module 3/3-4(1).svg",
@@ -127,6 +119,7 @@ export default function AllModules() {
         title: "Урок 4",
         text: "Доходность и риск — как они связаны",
         href: "/all-modules/module-3/lesson-4",
+        lessonId: 10,
       },
     ],
     4: [
@@ -137,6 +130,7 @@ export default function AllModules() {
         title: "Урок 1",
         text: "Как начать инвестировать самостоятельно",
         href: "/all-modules/module-4/lesson-1",
+        lessonId: 11,
       },
       {
         imageSrc: "/images/start page and modules page/module 4/4-2(1).svg",
@@ -145,6 +139,7 @@ export default function AllModules() {
         title: "Урок 2",
         text: "Как инвестировать с помощью готовых решений",
         href: "/all-modules/module-4/lesson-2",
+        lessonId: 12,
       },
       {
         imageSrc: "/images/start page and modules page/module 4/4-3(1).svg",
@@ -153,6 +148,7 @@ export default function AllModules() {
         title: "Урок 3",
         text: "Что такое диверсификация и зачем она нужна",
         href: "/all-modules/module-4/lesson-3",
+        lessonId: 13,
       },
       {
         imageSrc: "/images/start page and modules page/module 4/4-4(1).svg",
@@ -161,79 +157,76 @@ export default function AllModules() {
         title: "Урок 4",
         text: "С чего начать: первые шаги в инвестициях",
         href: "/all-modules/module-4/lesson-4",
+        lessonId: 14,
       },
     ],
-  };
-
-  // Функция для определения состояния модуля
-  const getModuleState = (moduleNumber) => {
-    if (moduleNumber === 1) {
-      // Первый модуль всегда открыт
-      return "open";
-    }
-
-    if (!userProgress || !userProgress.modules) {
-      // Если прогресс не загружен, все модули кроме первого заблокированы
-      return "locked";
-    }
-
-    // Проверяем завершен ли предыдущий модуль
-    const prevModuleProgress = userProgress.modules.find(
-      (m) => m.order_index === moduleNumber - 1
-    );
-
-    if (prevModuleProgress && prevModuleProgress.completed) {
-      return "open";
-    }
-
-    return "locked";
-  };
-
-  // Функция для определения состояния урока
-  const getLessonState = (moduleNumber, lessonIndex) => {
-    // Если модуль заблокирован, все его уроки тоже заблокированы
-    const moduleState = getModuleState(moduleNumber);
-    if (moduleState === "locked") {
-      return "locked";
-    }
-
-    if (!userProgress || !userProgress.modules) {
-      // Если прогресс не загружен, но модуль открыт - показываем уроки как открытые
-      return "open";
-    }
-
-    // Находим модуль в прогрессе
-    const moduleProgress = userProgress.modules.find(
-      (m) => m.order_index === moduleNumber
-    );
-
-    if (!moduleProgress) {
-      // Модуль не найден в БД, но разблокирован - уроки открыты
-      return "open";
-    }
-
-    // Проверяем состояние конкретного урока
-    if (moduleProgress.lessons && moduleProgress.lessons[lessonIndex]) {
-      const lessonProgress = moduleProgress.lessons[lessonIndex];
-
-      if (lessonProgress.completed) {
-        return "done";
-      }
-    }
-
-    // Урок не завершен, но модуль открыт - урок доступен
-    return "open";
   };
 
   // Функция для получения уроков с динамическим состоянием
   const getLessonsWithState = (moduleNumber) => {
     const lessons = lessonsByModule[moduleNumber] || [];
 
-    return lessons.map((lesson, index) => ({
-      ...lesson,
-      state: getLessonState(moduleNumber, index),
-    }));
+    return lessons.map((lesson) => {
+      const status = getLessonStatus(lesson.lessonId);
+
+      // Преобразуем статус в состояние для LessonCard
+      let state;
+      switch (status) {
+        case "completed":
+          state = "done";
+          break;
+        case "open":
+          state = "open";
+          break;
+        case "locked":
+        default:
+          state = "locked";
+          break;
+      }
+
+      return {
+        ...lesson,
+        state,
+      };
+    });
   };
+
+  // Показываем загрузку если данные еще не готовы
+  if (!isReady) {
+    return (
+      <div className="min-h-screen bg-[#F5ECDA] flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-gray-600 mb-2">Загружаем ваши модули...</div>
+          <div className="text-sm text-gray-400">
+            Получаем данные о прогрессе
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку если есть проблемы
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-[#F5ECDA] flex items-center justify-center p-4">
+        <div className="bg-white p-6 rounded-lg shadow-lg max-w-md text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2 text-[#283B41]">
+            Ошибка загрузки
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {error?.message || "Не удалось загрузить данные"}
+          </p>
+          <button
+            onClick={retryDbUser}
+            className="bg-[#4a90e2] text-white px-4 py-2 rounded-lg"
+          >
+            Попробовать снова
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5ECDA]">
@@ -275,24 +268,41 @@ export default function AllModules() {
             <div>Username: @{telegramUser?.username}</div>
             <div>БД ID: {dbUser?.id}</div>
             <div>Локальная разработка: {isLocalDevelopment ? "Да" : "Нет"}</div>
-            {userProgress && (
+            {userStats && (
               <div>
-                <div className="font-bold mt-2 mb-1">Прогресс:</div>
+                <div className="font-bold mt-2 mb-1">Статистика:</div>
                 <div>
-                  Завершено уроков: {userProgress.stats?.completed_lessons || 0}
+                  Завершено уроков: {userStats.completed_lessons || 0}/14
                 </div>
                 <div>
-                  Завершено модулей:{" "}
-                  {userProgress.stats?.completed_modules || 0}
+                  Завершено модулей: {userStats.completed_modules || 0}/4
+                </div>
+                <div>Прогресс уроков: {userStats.lessons_percentage || 0}%</div>
+                <div>
+                  Прогресс модулей: {userStats.modules_percentage || 0}%
                 </div>
                 <div>
-                  Общий прогресс: {userProgress.stats?.overall_progress || 0}%
+                  Среднее время: {userStats.average_lesson_time || 0} сек
                 </div>
                 <div className="font-bold mt-2 mb-1">Состояние модулей:</div>
                 <div>
-                  Модуль 1: {getModuleState(1)} | Модуль 2: {getModuleState(2)}{" "}
-                  | Модуль 3: {getModuleState(3)} | Модуль 4:{" "}
-                  {getModuleState(4)}
+                  Модуль 1: {getModuleStatus(1)} (
+                  {isModuleCompleted(1) ? "✅" : "❌"}) | Модуль 2:{" "}
+                  {getModuleStatus(2)} ({isModuleCompleted(2) ? "✅" : "❌"}) |
+                  Модуль 3: {getModuleStatus(3)} (
+                  {isModuleCompleted(3) ? "✅" : "❌"}) | Модуль 4:{" "}
+                  {getModuleStatus(4)} ({isModuleCompleted(4) ? "✅" : "❌"})
+                </div>
+                <div className="font-bold mt-2 mb-1">
+                  Состояние уроков (первые 4):
+                </div>
+                <div>
+                  Урок 1: {getLessonStatus(1)} (
+                  {isLessonCompleted(1) ? "✅" : "❌"}) | Урок 2:{" "}
+                  {getLessonStatus(2)} ({isLessonCompleted(2) ? "✅" : "❌"}) |
+                  Урок 3: {getLessonStatus(3)} (
+                  {isLessonCompleted(3) ? "✅" : "❌"}) | Урок 4:{" "}
+                  {getLessonStatus(4)} ({isLessonCompleted(4) ? "✅" : "❌"})
                 </div>
                 <div>Выбранный модуль: {selectedModule}</div>
               </div>
@@ -300,7 +310,7 @@ export default function AllModules() {
           </div>
         )}
 
-        <main className="">
+        <main>
           <div
             className="mb-[30px] overflow-x-auto"
             style={{ WebkitOverflowScrolling: "touch" }}
@@ -318,34 +328,34 @@ export default function AllModules() {
                 imageAlt="Target"
                 title="Модуль №1"
                 text="Учимся ставить цели"
-                locked={getModuleState(1) === "locked"}
+                locked={getModuleStatus(1) === "locked"}
                 bgColor="#DFB57F"
                 onClick={() => setSelectedModule(1)}
               />
               <ModuleCard
                 imageSrc="/images/Coins.png"
-                imageAlt="Target"
+                imageAlt="Coins"
                 title="Модуль №2"
                 text="Знакомимся с миром инвестиций"
-                locked={getModuleState(2) === "locked"}
+                locked={getModuleStatus(2) === "locked"}
                 bgColor="#E9CDA7"
                 onClick={() => setSelectedModule(2)}
               />
               <ModuleCard
                 imageSrc="/images/Tablet.png"
-                imageAlt="Target"
+                imageAlt="Tablet"
                 title="Модуль №3"
                 text="Исследуем инструменты инвестора"
-                locked={getModuleState(3) === "locked"}
+                locked={getModuleStatus(3) === "locked"}
                 bgColor="#DFB57F"
                 onClick={() => setSelectedModule(3)}
               />
               <ModuleCard
                 imageSrc="/images/Bag with stuff.png"
-                imageAlt="Target"
+                imageAlt="Bag"
                 title="Модуль №4"
                 text="Собираем твой первый портфель"
-                locked={getModuleState(4) === "locked"}
+                locked={getModuleStatus(4) === "locked"}
                 bgColor="#E9CDA7"
                 onClick={() => setSelectedModule(4)}
               />
@@ -361,32 +371,20 @@ export default function AllModules() {
               {`Модуль ${selectedModule}. Список уроков:`}
             </h2>
 
-            {isLoadingProgress ? (
-              <div className="text-center py-8">
-                <div className="text-gray-600">
-                  Загружаем прогресс уроков...
-                </div>
-              </div>
+            {getLessonsWithState(selectedModule).length === 0 ? (
+              <div className="text-gray-400">Нет уроков для этого модуля</div>
             ) : (
-              <>
-                {getLessonsWithState(selectedModule).length === 0 ? (
-                  <div className="text-gray-400">
-                    Нет уроков для этого модуля
-                  </div>
+              getLessonsWithState(selectedModule).map((lesson, idx) =>
+                lesson.href && lesson.state !== "locked" ? (
+                  <Link key={idx} href={lesson.href} legacyBehavior>
+                    <a style={{ display: "block" }}>
+                      <LessonCard {...lesson} />
+                    </a>
+                  </Link>
                 ) : (
-                  getLessonsWithState(selectedModule).map((lesson, idx) =>
-                    lesson.href && lesson.state !== "locked" ? (
-                      <Link key={idx} href={lesson.href} legacyBehavior>
-                        <a style={{ display: "block" }}>
-                          <LessonCard {...lesson} />
-                        </a>
-                      </Link>
-                    ) : (
-                      <LessonCard key={idx} {...lesson} />
-                    )
-                  )
-                )}
-              </>
+                  <LessonCard key={idx} {...lesson} />
+                )
+              )
             )}
           </div>
         </main>

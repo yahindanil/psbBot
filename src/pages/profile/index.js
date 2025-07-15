@@ -1,16 +1,21 @@
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useUser } from "@/contexts/UserContext";
-import { getUserProgress } from "@/utils/api";
 
 export default function Profile() {
-  const [userProgress, setUserProgress] = useState(null);
-  const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const [showCopyPopup, setShowCopyPopup] = useState(false);
 
   // Получаем данные пользователя из контекста
-  const { telegramUser } = useUser();
+  const {
+    telegramUser,
+    dbUser,
+    userStats,
+    isReady,
+    hasError,
+    error,
+    retryDbUser,
+  } = useUser();
 
   // Функция копирования ссылки
   const handleInviteFriends = async () => {
@@ -41,53 +46,19 @@ export default function Profile() {
     }
   };
 
-  // Загружаем прогресс пользователя
-  useEffect(() => {
-    const fetchUserProgress = async () => {
-      if (!telegramUser?.id) return;
-
-      try {
-        setIsLoadingProgress(true);
-        const progress = await getUserProgress(telegramUser.id);
-        setUserProgress(progress);
-      } catch (error) {
-        console.error("[Profile] Ошибка загрузки прогресса:", error);
-        setUserProgress({ stats: { completed_lessons: 0, total_lessons: 14 } });
-      } finally {
-        setIsLoadingProgress(false);
-      }
-    };
-
-    fetchUserProgress();
-  }, [telegramUser?.id]);
-
   // Вычисляем динамические значения
-  const completedLessons = userProgress?.stats?.completed_lessons || 0;
-  const totalLessons = userProgress?.stats?.total_lessons || 14;
+  const completedLessons = userStats?.completed_lessons || 0;
+  const totalLessons = userStats?.total_lessons || 14;
+  const completedModules = userStats?.completed_modules || 0;
+  const totalModules = userStats?.total_modules || 4;
 
   // Вычисляем среднее время прохождения уроков
   const averageTime = useMemo(() => {
-    if (!userProgress?.modules || completedLessons === 0) {
+    if (!userStats?.average_lesson_time || completedLessons === 0) {
       return { value: 0, text: "0" };
     }
 
-    let totalTimeSeconds = 0;
-    let completedCount = 0;
-
-    userProgress.modules.forEach((module) => {
-      if (module.lessons) {
-        module.lessons.forEach((lesson) => {
-          if (lesson.completed && lesson.time_spent_seconds) {
-            totalTimeSeconds += lesson.time_spent_seconds;
-            completedCount++;
-          }
-        });
-      }
-    });
-
-    if (completedCount === 0) return { value: 0, text: "0" };
-
-    const averageSeconds = totalTimeSeconds / completedCount;
+    const averageSeconds = userStats.average_lesson_time;
     const averageMinutes = Math.round(averageSeconds / 60);
 
     // Правильные падежи для минут
@@ -107,7 +78,7 @@ export default function Profile() {
       value: averageMinutes,
       text: `${averageMinutes} ${minuteText}`,
     };
-  }, [userProgress, completedLessons]);
+  }, [userStats, completedLessons]);
 
   // Текст мотивации в зависимости от прогресса
   const motivationText = useMemo(() => {
@@ -122,7 +93,9 @@ export default function Profile() {
 
   // Имя пользователя
   const userName = telegramUser?.first_name || "Пользователь";
-  if (isLoadingProgress) {
+
+  // Показываем загрузку если данные еще не готовы
+  if (!isReady) {
     return (
       <div className="bg-white min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -130,6 +103,29 @@ export default function Profile() {
           <div className="text-sm text-gray-400">
             Получаем данные о прогрессе
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Показываем ошибку если есть проблемы
+  if (hasError) {
+    return (
+      <div className="bg-white min-h-screen flex items-center justify-center p-4">
+        <div className="bg-gray-100 p-6 rounded-lg shadow-lg max-w-md text-center">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h2 className="text-xl font-bold mb-2 text-[#283B41]">
+            Ошибка загрузки профиля
+          </h2>
+          <p className="text-gray-600 mb-4">
+            {error?.message || "Не удалось загрузить данные профиля"}
+          </p>
+          <button
+            onClick={retryDbUser}
+            className="bg-[#4a90e2] text-white px-4 py-2 rounded-lg"
+          >
+            Попробовать снова
+          </button>
         </div>
       </div>
     );
@@ -191,12 +187,12 @@ export default function Profile() {
             <div className="border-b border-[#283B41] mb-[7px]"></div>
             <div className="flex items-center justify-between">
               <span className="text-[14px] font-semibold text-[#283B41] leading-none">
-                {completedLessons}/14
+                {completedLessons}/{totalLessons}
               </span>
               <div className="flex-1 flex justify-center">
                 {/* Прогрессбар */}
                 <div className="flex items-center justify-around border-[1px] px-[1px] border-[#283B41] rounded-[5px] w-[158px] h-[20px] bg-[#D8E2DE]">
-                  {[...Array(14)].map((_, i) => (
+                  {[...Array(totalLessons)].map((_, i) => (
                     <div
                       key={i}
                       className={`w-[9px] h-[16px] rounded-[5px] ${
@@ -261,6 +257,31 @@ export default function Profile() {
               Пригласить друзей
             </button>
           </div>
+
+          {/* Debug информация для разработки */}
+          {process.env.NODE_ENV === "development" && userStats && (
+            <div className="mt-4 p-3 bg-blue-100 rounded-lg text-sm text-left">
+              <div className="font-bold mb-1 text-blue-800">
+                Debug информация:
+              </div>
+              <div className="text-blue-700 space-y-1">
+                <div>
+                  Уроки: {userStats.completed_lessons}/{userStats.total_lessons}{" "}
+                  ({userStats.lessons_percentage}%)
+                </div>
+                <div>
+                  Модули: {userStats.completed_modules}/
+                  {userStats.total_modules} ({userStats.modules_percentage}%)
+                </div>
+                <div>
+                  Среднее время: {userStats.average_lesson_time} сек (
+                  {averageTime.text})
+                </div>
+                <div>Telegram ID: {telegramUser?.id}</div>
+                <div>БД ID: {dbUser?.id}</div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

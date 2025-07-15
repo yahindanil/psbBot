@@ -1,7 +1,7 @@
 import Router from "next/router";
 import { completeLesson } from "@/utils/api";
 
-// Маппинг URL урока к ID урока в базе данных
+// Маппинг URL урока к ID урока в базе данных (согласно новой документации API)
 const LESSON_URL_TO_ID_MAP = {
   "/all-modules/module-1/lesson-1": 1,
   "/all-modules/module-1/lesson-2": 2,
@@ -88,6 +88,7 @@ export function getTestUrlFromLessonUrl(lessonUrl) {
 
 /**
  * Проверяет ответы теста и перенаправляет на страницу результатов (базовая функция)
+ * @deprecated Используйте checkTestAndRedirectWithAPI для полной интеграции с API
  */
 export function checkTestAndRedirect({
   correctAnswers,
@@ -115,7 +116,9 @@ export function checkTestAndRedirect({
  * @param {string} params.lessonUrl - URL урока
  * @param {Object} params.router - Router объект Next.js
  * @param {Object} params.telegramUser - Данные пользователя Telegram
- * @param {number} params.timeSpentSeconds - Время прохождения теста в секундах
+ * @param {number} params.timeSpentSeconds - Время прохождения урока в секундах
+ * @param {Function} params.onLessonCompleted - Колбэк после успешного завершения урока
+ * @param {Function} params.addLog - Функция логирования
  */
 export async function checkTestAndRedirectWithAPI({
   correctAnswers,
@@ -124,6 +127,7 @@ export async function checkTestAndRedirectWithAPI({
   router,
   telegramUser,
   timeSpentSeconds = 300, // По умолчанию 5 минут
+  onLessonCompleted = null,
   addLog = console.log, // Функция логирования, по умолчанию console.log
 }) {
   const log = (type, message, data) => {
@@ -176,22 +180,28 @@ export async function checkTestAndRedirectWithAPI({
           timeSpentSeconds,
         });
 
-        // Создаем обертку для completeLesson с логированием
-        const { completeLesson } = await import("@/utils/api");
-
-        // Передаем функцию логирования в API
-        const result = await completeLessonWithLogging(
+        // Отправляем запрос о завершении урока
+        const result = await completeLesson(
           telegramUser.id,
           lessonId,
-          timeSpentSeconds,
-          log
+          timeSpentSeconds
         );
 
         log("success", `Урок успешно завершен`, result);
 
-        // Если модуль также завершен, можем показать дополнительную информацию
+        // Если модуль также завершен, показываем дополнительную информацию
         if (result.module_completed) {
-          log("success", `Модуль также завершен`, result.module);
+          log("success", `Модуль ${result.module_id} также завершен!`, result);
+        }
+
+        // Вызываем колбэк после успешного завершения урока
+        if (typeof onLessonCompleted === "function") {
+          try {
+            await onLessonCompleted(result);
+            log("info", "Колбэк onLessonCompleted выполнен успешно");
+          } catch (callbackError) {
+            log("error", "Ошибка в колбэке onLessonCompleted", callbackError);
+          }
         }
       } else {
         log("warning", `Lesson ID не найден для URL: ${lessonUrl}`);
@@ -201,6 +211,7 @@ export async function checkTestAndRedirectWithAPI({
       log("error", `Ошибка отправки результата теста в API`, {
         message: error.message,
         details: error.details,
+        type: error.type,
       });
       // Не блокируем пользователя, просто логируем ошибку
     }
@@ -228,29 +239,109 @@ export async function checkTestAndRedirectWithAPI({
   log("info", `Функция завершена`);
 }
 
-// Обертка для completeLesson с логированием
-async function completeLessonWithLogging(
-  telegramId,
-  lessonId,
-  timeSpentSeconds,
-  log
-) {
-  const { completeLesson } = await import("@/utils/api");
+/**
+ * Улучшенная версия функции с интеграцией таймера урока
+ * @param {Object} params - Параметры теста
+ * @param {Array} params.correctAnswers - Массив правильных ответов
+ * @param {Array} params.userAnswers - Массив ответов пользователя
+ * @param {string} params.lessonUrl - URL урока
+ * @param {Object} params.router - Router объект Next.js
+ * @param {Object} params.telegramUser - Данные пользователя Telegram
+ * @param {Object} params.lessonTimer - Объект таймера урока (из useLessonTimer)
+ * @param {Function} params.onLessonCompleted - Колбэк после успешного завершения урока
+ * @param {Function} params.refreshUserData - Функция обновления данных пользователя
+ * @param {Function} params.addLog - Функция логирования
+ */
+export async function checkTestWithTimer({
+  correctAnswers,
+  userAnswers,
+  lessonUrl,
+  router,
+  telegramUser,
+  lessonTimer,
+  onLessonCompleted = null,
+  refreshUserData = null,
+  addLog = console.log,
+}) {
+  const log = (type, message, data) => {
+    if (typeof addLog === "function") {
+      addLog(type, message, data);
+    } else {
+      console.log(`[${type.toUpperCase()}] ${message}`, data || "");
+    }
+  };
 
-  log("info", "Вызов API completeLesson...");
+  log("info", "Начало функции checkTestWithTimer", {
+    lessonUrl,
+    hasTimer: !!lessonTimer,
+    telegramUser: telegramUser
+      ? { id: telegramUser.id, first_name: telegramUser.first_name }
+      : null,
+  });
 
-  try {
-    const result = await completeLesson(telegramId, lessonId, timeSpentSeconds);
-    log("success", "API completeLesson завершен успешно", result);
-    return result;
-  } catch (error) {
-    log("error", "Ошибка в API completeLesson", {
-      message: error.message,
-      details: error.details,
-      type: error.type,
-    });
-    throw error;
+  // Останавливаем таймер и получаем время урока
+  let timeSpentSeconds = 300; // Значение по умолчанию (5 минут)
+
+  if (lessonTimer && typeof lessonTimer.stopTimer === "function") {
+    try {
+      timeSpentSeconds = lessonTimer.stopTimer();
+      log("info", `Таймер остановлен. Время урока: ${timeSpentSeconds} секунд`);
+
+      // Если время слишком маленькое, используем минимальное значение
+      if (timeSpentSeconds < 10) {
+        log(
+          "warning",
+          `Время урока слишком маленькое (${timeSpentSeconds}с), используем минимальное значение`
+        );
+        timeSpentSeconds = 60; // 1 минута минимум
+      }
+
+      // Если время слишком большое, ограничиваем его
+      if (timeSpentSeconds > 7200) {
+        // 2 часа
+        log(
+          "warning",
+          `Время урока слишком большое (${timeSpentSeconds}с), ограничиваем до 2 часов`
+        );
+        timeSpentSeconds = 7200;
+      }
+    } catch (timerError) {
+      log("error", "Ошибка при остановке таймера", timerError);
+      timeSpentSeconds = 300; // Используем значение по умолчанию
+    }
+  } else {
+    log(
+      "warning",
+      "Таймер не предоставлен или некорректен, используем время по умолчанию"
+    );
   }
+
+  // Вызываем основную функцию проверки теста
+  await checkTestAndRedirectWithAPI({
+    correctAnswers,
+    userAnswers,
+    lessonUrl,
+    router,
+    telegramUser,
+    timeSpentSeconds,
+    onLessonCompleted: async (result) => {
+      // Обновляем данные пользователя после завершения урока
+      if (typeof refreshUserData === "function") {
+        try {
+          await refreshUserData();
+          log("info", "Данные пользователя обновлены после завершения урока");
+        } catch (refreshError) {
+          log("error", "Ошибка обновления данных пользователя", refreshError);
+        }
+      }
+
+      // Вызываем переданный колбэк
+      if (typeof onLessonCompleted === "function") {
+        await onLessonCompleted(result);
+      }
+    },
+    addLog,
+  });
 }
 
 /**
@@ -269,4 +360,49 @@ export function getLessonIdFromUrl(lessonUrl) {
  */
 export function addLessonMapping(lessonUrl, lessonId) {
   LESSON_URL_TO_ID_MAP[lessonUrl] = lessonId;
+}
+
+/**
+ * Получает информацию о модуле по ID урока
+ * @param {number} lessonId - ID урока (1-14)
+ * @returns {Object} - Информация о модуле
+ */
+export function getModuleInfoByLessonId(lessonId) {
+  if (lessonId >= 1 && lessonId <= 4) {
+    return { moduleId: 1, moduleName: "Учимся ставить цели" };
+  } else if (lessonId >= 5 && lessonId <= 6) {
+    return { moduleId: 2, moduleName: "Знакомимся с миром инвестиций" };
+  } else if (lessonId >= 7 && lessonId <= 10) {
+    return { moduleId: 3, moduleName: "Исследуем инструменты инвестора" };
+  } else if (lessonId >= 11 && lessonId <= 14) {
+    return { moduleId: 4, moduleName: "Собираем твой первый портфель" };
+  }
+  return { moduleId: null, moduleName: "Неизвестный модуль" };
+}
+
+/**
+ * Проверяет, является ли урок последним в модуле
+ * @param {number} lessonId - ID урока (1-14)
+ * @returns {boolean} - true если урок последний в модуле
+ */
+export function isLastLessonInModule(lessonId) {
+  return [4, 6, 10, 14].includes(lessonId);
+}
+
+/**
+ * Получает номер урока в модуле
+ * @param {number} lessonId - ID урока (1-14)
+ * @returns {number} - Номер урока в модуле (1-4)
+ */
+export function getLessonNumberInModule(lessonId) {
+  if (lessonId >= 1 && lessonId <= 4) {
+    return lessonId;
+  } else if (lessonId >= 5 && lessonId <= 6) {
+    return lessonId - 4;
+  } else if (lessonId >= 7 && lessonId <= 10) {
+    return lessonId - 6;
+  } else if (lessonId >= 11 && lessonId <= 14) {
+    return lessonId - 10;
+  }
+  return 0;
 }

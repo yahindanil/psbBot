@@ -1,6 +1,6 @@
-// Базовый URL для API - используем переменную окружения
+// Базовый URL для API - используем переменную окружения или документированный URL
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://212.34.143.198:8000";
 
 // Функция для нормализации URL (убирает двойные слэши)
 const normalizeUrl = (baseUrl, endpoint) => {
@@ -14,7 +14,6 @@ const normalizeUrl = (baseUrl, endpoint) => {
   console.log(
     `[API] URL нормализация: ${baseUrl} + ${endpoint} = ${normalizedUrl}`
   );
-
   return normalizedUrl;
 };
 
@@ -29,8 +28,7 @@ if (typeof window !== "undefined") {
  */
 const checkBaseUrlConnectivity = async () => {
   try {
-    // Нормализуем URL для проверки доступности
-    const testUrl = API_BASE_URL.replace(/\/$/, ""); // Убираем завершающий слэш
+    const testUrl = API_BASE_URL.replace(/\/$/, "");
     const response = await fetch(testUrl, {
       method: "GET",
       mode: "cors",
@@ -98,17 +96,19 @@ const enhanceApiError = (
   enhancedError.details = errorInfo;
 
   console.error(`[API] ${errorType}:`, errorInfo);
-
   return enhancedError;
 };
 
 /**
  * Создает или получает пользователя
  * @param {Object} userData - Данные пользователя
+ * @param {number} userData.telegram_id - ID пользователя в Telegram
+ * @param {string} userData.username - Username пользователя
+ * @param {string} userData.first_name - Имя пользователя
  * @returns {Promise<Object>} Данные пользователя
  */
 export const createOrGetUser = async (userData) => {
-  const endpoint = "/api/users"; // Возвращаем правильный эндпоинт согласно документации
+  const endpoint = "/api/users";
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   // Проверяем доступность базового URL
@@ -189,12 +189,12 @@ export const createOrGetUser = async (userData) => {
 };
 
 /**
- * Получает прогресс пользователя
+ * Получает пользователя по Telegram ID
  * @param {number} telegramId - ID пользователя в Telegram
- * @returns {Promise<Object>} Прогресс пользователя
+ * @returns {Promise<Object>} Данные пользователя со всеми 18 полями (4 модуля + 14 уроков)
  */
-export const getUserProgress = async (telegramId) => {
-  const endpoint = `/api/users/${telegramId}/progress`;
+export const getUser = async (telegramId) => {
+  const endpoint = `/api/users/${telegramId}`;
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   try {
@@ -210,17 +210,41 @@ export const getUserProgress = async (telegramId) => {
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
 
-    // Согласно инструкции, API возвращает: { user: {...}, modules: [...], stats: {...} }
-    // Возвращаем структуру как есть для совместимости с существующим кодом
-    return {
-      user: result.user,
-      modules: result.modules || [],
-      stats: result.stats || { completed_lessons: 0 },
-    };
+    return result;
+  } catch (error) {
+    const enhancedError = enhanceApiError(error, endpoint, { telegramId });
+    console.error(`[API] Ошибка получения пользователя:`, enhancedError);
+    throw enhancedError;
+  }
+};
+
+/**
+ * Получает статистику пользователя
+ * @param {number} telegramId - ID пользователя в Telegram
+ * @returns {Promise<Object>} Статистика пользователя (ProgressStats)
+ */
+export const getUserStats = async (telegramId) => {
+  const endpoint = `/api/users/${telegramId}/stats`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
+  try {
+    console.log(`[API] Запрос к ${fullUrl}`);
+
+    const response = await fetch(fullUrl);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
+
+    return result;
   } catch (error) {
     const enhancedError = enhanceApiError(error, endpoint, { telegramId });
     console.error(
-      `[API] Ошибка получения прогресса пользователя:`,
+      `[API] Ошибка получения статистики пользователя:`,
       enhancedError
     );
     throw enhancedError;
@@ -228,9 +252,113 @@ export const getUserProgress = async (telegramId) => {
 };
 
 /**
+ * Получает среднее время прохождения уроков пользователем
+ * @param {number} telegramId - ID пользователя в Telegram
+ * @returns {Promise<Object>} Среднее время прохождения
+ */
+export const getUserAverageTime = async (telegramId) => {
+  const endpoint = `/api/users/${telegramId}/average-time`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
+  try {
+    console.log(`[API] Запрос к ${fullUrl}`);
+
+    const response = await fetch(fullUrl);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
+
+    return result;
+  } catch (error) {
+    const enhancedError = enhanceApiError(error, endpoint, { telegramId });
+    console.error(`[API] Ошибка получения среднего времени:`, enhancedError);
+    throw enhancedError;
+  }
+};
+
+/**
+ * Обновляет среднее время прохождения уроков
+ * @param {number} telegramId - ID пользователя в Telegram
+ * @param {number} averageTime - Новое среднее время в секундах
+ * @returns {Promise<Object>} Результат обновления
+ */
+export const updateUserAverageTime = async (telegramId, averageTime) => {
+  const endpoint = `/api/users/${telegramId}/average-time`;
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
+  const requestHeaders = {
+    "Content-Type": "application/json",
+  };
+
+  const requestBody = {
+    average_lesson_time: averageTime,
+  };
+
+  let requestDetails = {
+    fullUrl,
+    method: "PUT",
+    headers: requestHeaders,
+  };
+
+  try {
+    console.log(`[API] Запрос к ${fullUrl}`, {
+      requestBody,
+      headers: requestHeaders,
+    });
+
+    const response = await fetch(fullUrl, {
+      method: "PUT",
+      headers: requestHeaders,
+      body: JSON.stringify(requestBody),
+    });
+
+    // Добавляем информацию о ответе
+    requestDetails.responseStatus = response.status;
+    requestDetails.responseStatusText = response.statusText;
+    requestDetails.responseHeaders = {};
+
+    // Собираем заголовки ответа
+    for (const [key, value] of response.headers.entries()) {
+      requestDetails.responseHeaders[key] = value;
+    }
+
+    console.log(`[API] Получен ответ:`, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: requestDetails.responseHeaders,
+      ok: response.ok,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log(`[API] Тело ошибки:`, errorText);
+      throw new Error(`API Error ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
+    return result;
+  } catch (error) {
+    const enhancedError = enhanceApiError(
+      error,
+      endpoint,
+      { telegramId, averageTime },
+      requestDetails
+    );
+    console.error(`[API] Ошибка обновления среднего времени:`, enhancedError);
+    throw enhancedError;
+  }
+};
+
+/**
  * Отмечает урок как завершенный
  * @param {number} telegramId - ID пользователя в Telegram
- * @param {number} lessonId - ID урока
+ * @param {number} lessonId - ID урока (от 1 до 14)
  * @param {number} timeSpentSeconds - Время, потраченное на урок в секундах
  * @returns {Promise<Object>} Результат завершения урока
  */
@@ -239,13 +367,14 @@ export const completeLesson = async (
   lessonId,
   timeSpentSeconds = 0
 ) => {
-  const endpoint = `/api/users/${telegramId}/lessons/${lessonId}/complete`;
+  const endpoint = `/api/users/${telegramId}/complete/${lessonId}`;
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
   const requestData = { telegramId, lessonId, timeSpentSeconds };
   const requestHeaders = {
     "Content-Type": "application/json",
   };
   const requestBody = {
+    lesson_id: lessonId,
     time_spent_seconds: timeSpentSeconds,
   };
 
@@ -307,50 +436,11 @@ export const completeLesson = async (
 };
 
 /**
- * Фильтрует дубликаты модулей, оставляя только самые новые для каждого order_index
- * @param {Array} modules - Массив модулей
- * @returns {Array} Отфильтрованный массив модулей
+ * Получает информацию о системе (health check)
+ * @returns {Promise<Object>} Информация о системе
  */
-const filterDuplicateModules = (modules) => {
-  if (!Array.isArray(modules)) return [];
-
-  const modulesByOrder = {};
-
-  // Группируем модули по order_index
-  modules.forEach((module) => {
-    const orderIndex = module.order_index;
-    if (!modulesByOrder[orderIndex]) {
-      modulesByOrder[orderIndex] = [];
-    }
-    modulesByOrder[orderIndex].push(module);
-  });
-
-  // Для каждого order_index берем самый новый модуль (по created_at)
-  const filteredModules = [];
-  for (const orderIndex in modulesByOrder) {
-    const modulesForOrder = modulesByOrder[orderIndex];
-
-    // Сортируем по дате создания (самый новый первым)
-    modulesForOrder.sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
-
-    // Берем самый новый
-    filteredModules.push(modulesForOrder[0]);
-  }
-
-  // Сортируем по order_index
-  filteredModules.sort((a, b) => a.order_index - b.order_index);
-
-  return filteredModules;
-};
-
-/**
- * Получает список всех модулей
- * @returns {Promise<Array>} Список модулей
- */
-export const getModules = async () => {
-  const endpoint = "/api/modules";
+export const getSystemInfo = async () => {
+  const endpoint = "/";
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   try {
@@ -364,34 +454,20 @@ export const getModules = async () => {
 
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
-
-    // Извлекаем массив модулей из обертки согласно инструкции бекендера
-    const modules = result.modules || result;
-
-    // Фильтруем дубликаты на фронтенде (временное решение)
-    if (Array.isArray(modules)) {
-      const filteredModules = filterDuplicateModules(modules);
-      console.log(
-        `[API] Отфильтровано ${modules.length} -> ${filteredModules.length} модулей`
-      );
-      return filteredModules;
-    }
-
-    return modules;
+    return result;
   } catch (error) {
     const enhancedError = enhanceApiError(error, endpoint);
-    console.error("Ошибка получения модулей:", enhancedError);
+    console.error("Ошибка получения информации о системе:", enhancedError);
     throw enhancedError;
   }
 };
 
 /**
- * Получает уроки модуля
- * @param {number} moduleId - ID модуля
- * @returns {Promise<Array>} Список уроков
+ * Получает состояние здоровья API
+ * @returns {Promise<Object>} Состояние API
  */
-export const getModuleLessons = async (moduleId) => {
-  const endpoint = `/api/modules/${moduleId}/lessons`;
+export const getHealthCheck = async () => {
+  const endpoint = "/health";
   const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
 
   try {
@@ -405,12 +481,40 @@ export const getModuleLessons = async (moduleId) => {
 
     const result = await response.json();
     console.log(`[API] Успешный ответ от ${endpoint}:`, result);
-
-    // Извлекаем массив уроков из обертки согласно инструкции бекендера
-    return result.lessons || result;
+    return result;
   } catch (error) {
     const enhancedError = enhanceApiError(error, endpoint);
-    console.error("Ошибка получения уроков модуля:", enhancedError);
+    console.error("Ошибка проверки здоровья API:", enhancedError);
     throw enhancedError;
   }
 };
+
+/**
+ * Получает структуру курса (для отладки)
+ * @returns {Promise<Object>} Структура курса
+ */
+export const getCourseStructure = async () => {
+  const endpoint = "/api/debug/structure";
+  const fullUrl = normalizeUrl(API_BASE_URL, endpoint);
+
+  try {
+    console.log(`[API] Запрос к ${fullUrl}`);
+    const response = await fetch(fullUrl);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API Error ${response.status}: ${errorText}`);
+    }
+
+    const result = await response.json();
+    console.log(`[API] Успешный ответ от ${endpoint}:`, result);
+    return result;
+  } catch (error) {
+    const enhancedError = enhanceApiError(error, endpoint);
+    console.error("Ошибка получения структуры курса:", enhancedError);
+    throw enhancedError;
+  }
+};
+
+// Удаляем старые неиспользуемые функции (getUserProgress, getModules, getModuleLessons)
+// так как новый API имеет другую структуру

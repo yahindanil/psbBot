@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { createOrGetUser } from "@/utils/api";
+import { createOrGetUser, getUser, getUserStats } from "@/utils/api";
 
 const UserContext = createContext();
 
@@ -30,9 +30,13 @@ export const UserProvider = ({ children }) => {
     isTelegramLoaded: false,
     isInTelegram: false,
 
-    // Данные из нашей БД
+    // Данные из нашей БД (полная информация о пользователе)
     dbUser: null,
     isDbUserLoaded: false,
+
+    // Статистика пользователя
+    userStats: null,
+    isStatsLoaded: false,
 
     // Состояние загрузки и ошибок
     isInitializing: true,
@@ -55,6 +59,50 @@ export const UserProvider = ({ children }) => {
       window.location.hostname === "127.0.0.1" ||
       window.location.hostname === "::1"
     );
+  };
+
+  // Загружает полные данные пользователя и статистику
+  const loadUserData = async (telegramId) => {
+    try {
+      log("Загрузка полных данных пользователя...");
+
+      // Загружаем данные пользователя и статистику параллельно
+      const [userData, statsData] = await Promise.all([
+        getUser(telegramId),
+        getUserStats(telegramId),
+      ]);
+
+      log("Данные пользователя получены:", userData);
+      log("Статистика пользователя получена:", statsData);
+
+      setState((prev) => ({
+        ...prev,
+        dbUser: userData,
+        userStats: statsData,
+        isDbUserLoaded: true,
+        isStatsLoaded: true,
+        isInitializing: false,
+        error: null,
+      }));
+
+      return { userData, statsData };
+    } catch (error) {
+      log("Ошибка при загрузке данных пользователя:", error);
+
+      const errorMessage = error.type
+        ? `${error.type}: ${error.message}`
+        : error.message || "Неизвестная ошибка подключения";
+
+      setState((prev) => ({
+        ...prev,
+        error: error,
+        isDbUserLoaded: true,
+        isStatsLoaded: true,
+        isInitializing: false,
+      }));
+
+      throw error;
+    }
   };
 
   // Инициализация Telegram WebApp или локальных данных
@@ -88,24 +136,20 @@ export const UserProvider = ({ children }) => {
 
           log("Тестовый пользователь успешно создан/получен в БД", dbUserData);
 
-          setState((prev) => ({
-            ...prev,
-            dbUser: dbUserData,
-            isDbUserLoaded: true,
-            isInitializing: false,
-          }));
+          // Загружаем полные данные пользователя
+          await loadUserData(mockUserData.id);
         } catch (error) {
           log("Ошибка при работе с БД (тестовые данные)", error);
 
-          // Создаем подробное описание ошибки
           const errorMessage = error.type
             ? `${error.type}: ${error.message}`
             : error.message || "Неизвестная ошибка подключения";
 
           setState((prev) => ({
             ...prev,
-            error: error, // Передаем весь объект ошибки для детального анализа
+            error: error,
             isDbUserLoaded: true,
+            isStatsLoaded: true,
             isInitializing: false,
           }));
         }
@@ -151,19 +195,16 @@ export const UserProvider = ({ children }) => {
 
             log("Пользователь успешно создан/получен в БД", dbUserData);
 
-            setState((prev) => ({
-              ...prev,
-              dbUser: dbUserData,
-              isDbUserLoaded: true,
-              isInitializing: false,
-            }));
+            // Загружаем полные данные пользователя
+            await loadUserData(userData.id);
           } catch (error) {
             log("Ошибка при работе с БД", error);
 
             setState((prev) => ({
               ...prev,
-              error: error, // Передаем весь объект ошибки для детального анализа
+              error: error,
               isDbUserLoaded: true,
+              isStatsLoaded: true,
               isInitializing: false,
             }));
           }
@@ -215,50 +256,126 @@ export const UserProvider = ({ children }) => {
         dbUserData
       );
 
-      setState((prev) => ({
-        ...prev,
-        dbUser: dbUserData,
-        isDbUserLoaded: true,
-        isInitializing: false,
-        error: null,
-      }));
+      // Загружаем полные данные пользователя
+      await loadUserData(state.telegramUser.id);
     } catch (error) {
       log("Ошибка при повторной попытке работы с БД", error);
 
       setState((prev) => ({
         ...prev,
-        error: error, // Передаем весь объект ошибки для детального анализа
+        error: error,
         isInitializing: false,
       }));
     }
+  };
+
+  // Функция для обновления данных пользователя
+  const refreshUserData = async () => {
+    if (!state.telegramUser?.id) {
+      log("Нет ID пользователя для обновления данных");
+      return;
+    }
+
+    try {
+      log("Обновление данных пользователя...");
+      await loadUserData(state.telegramUser.id);
+      log("Данные пользователя успешно обновлены");
+    } catch (error) {
+      log("Ошибка при обновлении данных пользователя:", error);
+      throw error;
+    }
+  };
+
+  // Функция для проверки, пройден ли конкретный урок
+  const isLessonCompleted = (lessonId) => {
+    if (!state.dbUser) return false;
+    const lessonField = `lesson_${lessonId}`;
+    return Boolean(state.dbUser[lessonField]);
+  };
+
+  // Функция для проверки, завершен ли модуль
+  const isModuleCompleted = (moduleId) => {
+    if (!state.dbUser) return false;
+    const moduleField = `module_${moduleId}`;
+    return Boolean(state.dbUser[moduleField]);
+  };
+
+  // Функция для получения статуса урока (открыт/закрыт/пройден)
+  const getLessonStatus = (lessonId) => {
+    if (!state.dbUser) return "locked";
+
+    // Проверяем, пройден ли урок
+    if (isLessonCompleted(lessonId)) {
+      return "completed";
+    }
+
+    // Первый урок всегда открыт
+    if (lessonId === 1) {
+      return "open";
+    }
+
+    // Для остальных уроков проверяем, пройден ли предыдущий
+    const prevLessonCompleted = isLessonCompleted(lessonId - 1);
+    return prevLessonCompleted ? "open" : "locked";
+  };
+
+  // Функция для получения статуса модуля
+  const getModuleStatus = (moduleId) => {
+    if (!state.dbUser) return "locked";
+
+    // Проверяем, завершен ли модуль
+    if (isModuleCompleted(moduleId)) {
+      return "completed";
+    }
+
+    // Первый модуль всегда открыт
+    if (moduleId === 1) {
+      return "open";
+    }
+
+    // Для остальных модулей проверяем, завершен ли предыдущий
+    const prevModuleCompleted = isModuleCompleted(moduleId - 1);
+    return prevModuleCompleted ? "open" : "locked";
   };
 
   const value = {
     // Данные
     telegramUser: state.telegramUser,
     dbUser: state.dbUser,
+    userStats: state.userStats,
 
     // Состояния загрузки
     isTelegramLoaded: state.isTelegramLoaded,
     isDbUserLoaded: state.isDbUserLoaded,
+    isStatsLoaded: state.isStatsLoaded,
     isInTelegram: state.isInTelegram,
     isInitializing: state.isInitializing,
 
     // Ошибки и действия
     error: state.error,
     retryDbUser,
+    refreshUserData,
 
     // Дополнительные флаги
     isLocalDevelopment: state.isLocalDevelopment,
 
     // Вспомогательные геттеры
     isReady:
-      state.isTelegramLoaded && state.isDbUserLoaded && !state.isInitializing,
+      state.isTelegramLoaded &&
+      state.isDbUserLoaded &&
+      state.isStatsLoaded &&
+      !state.isInitializing,
     hasError: !!state.error,
     canUseApp:
       (state.isInTelegram || state.isLocalDevelopment) &&
       state.telegramUser &&
       state.dbUser,
+
+    // Функции для работы с уроками и модулями
+    isLessonCompleted,
+    isModuleCompleted,
+    getLessonStatus,
+    getModuleStatus,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
