@@ -230,7 +230,7 @@ export default function AllModules() {
 
   return (
     <div className="min-h-screen bg-[#F5ECDA]">
-      <div className="container-without-padding">
+      <div className="container-without-padding pb-8">
         <header className="flex justify-between items-center mb-[15px] pl-[16px] pr-[16px] pt-[30px]">
           <h1>Все модули</h1>
           <Link href="/profile" aria-label="Profile">
@@ -388,15 +388,6 @@ export default function AllModules() {
             )}
           </div>
         </main>
-      </div>
-
-      <div className="text-center mt-6 mb-8">
-        <Link
-          href="/dev"
-          className="inline-block bg-[#4caf50] text-white px-6 py-3 rounded-lg font-semibold text-base hover:bg-[#45a049] transition-colors duration-300"
-        >
-          Dev - Данные пользователя
-        </Link>
       </div>
     </div>
   );

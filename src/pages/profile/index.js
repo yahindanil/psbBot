@@ -133,7 +133,7 @@ export default function Profile() {
 
   return (
     <div className="bg-white min-h-screen">
-      <div className="container-without-padding text-center">
+      <div className="container-without-padding text-center pb-8">
         <div className="h-[326px] bg-[#749484] rounded-b-[15px] pt-[30px] pl-[16px] pr-[16px]">
           <Link
             href="/all-modules"

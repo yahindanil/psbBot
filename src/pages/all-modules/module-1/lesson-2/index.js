@@ -265,9 +265,7 @@ const lessonPages = [
   },
   {
     type: "lesson",
-    content: (
-      <TestBlock testUrl="/all-modules/module-1/lesson-2/test" />
-    ),
+    content: <TestBlock testUrl="/all-modules/module-1/lesson-2/test" />,
     bg: "bg-[#DFB57F]",
   },
 ];
@@ -283,7 +281,7 @@ export default function Lesson() {
     setPage((p) => Math.min(lessonPages.length - 1, p + 1));
 
   return (
-    <div className="container-without-padding pt-[20px] min-h-screen">
+    <div className="container-without-padding pt-[20px] pb-8 min-h-screen">
       {/* Preload all images */}
       <div style={{ display: "none" }}>
         <Image
