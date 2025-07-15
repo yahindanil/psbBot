@@ -2,11 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import ModuleCard from "@/components/ui/ModuleCard";
 import LessonCard from "@/components/ui/LessonCard";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useUser } from "@/contexts/UserContext";
 
 export default function AllModules() {
   const [selectedModule, setSelectedModule] = useState(1);
+  const scrollContainerRef = useRef(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
+  const [hasMoved, setHasMoved] = useState(false);
 
   // Получаем данные пользователя из контекста
   const {
@@ -23,6 +28,73 @@ export default function AllModules() {
     isLessonCompleted,
     isModuleCompleted,
   } = useUser();
+
+  // Функции для drag-to-scroll
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setStartX(e.pageX);
+    setScrollLeft(scrollContainerRef.current.scrollLeft);
+    setHasMoved(false);
+    scrollContainerRef.current.style.scrollBehavior = "auto";
+    scrollContainerRef.current.style.transition = "none";
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    e.preventDefault();
+    const x = e.pageX;
+    const distance = Math.abs(x - startX);
+
+    // Если движение больше 5 пикселей, считаем это drag
+    if (distance > 5) {
+      setHasMoved(true);
+    }
+
+    const walk = (x - startX) * 1; // 1:1 ratio for smooth movement
+    scrollContainerRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.scrollBehavior = "smooth";
+      scrollContainerRef.current.style.transition = "";
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.scrollBehavior = "smooth";
+      scrollContainerRef.current.style.transition = "";
+    }
+  };
+
+  // Установка event listeners
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    // Отключаем выделение текста во время drag
+    container.addEventListener("selectstart", (e) => {
+      if (isDragging) e.preventDefault();
+    });
+
+    return () => {
+      if (container) {
+        container.removeEventListener("selectstart", (e) => {
+          if (isDragging) e.preventDefault();
+        });
+      }
+    };
+  }, [isDragging]);
+
+  // Функция для обработки клика по модулю (предотвращает клик после drag)
+  const handleModuleClick = (moduleNumber) => {
+    if (!hasMoved) {
+      setSelectedModule(moduleNumber);
+    }
+  };
 
   // Базовые данные уроков (статичные метаданные)
   const lessonsByModule = {
@@ -250,11 +322,18 @@ export default function AllModules() {
             style={{ WebkitOverflowScrolling: "touch" }}
           >
             <div
+              ref={scrollContainerRef}
               className="flex gap-[15px] pl-[16px] pr-[16px] modules-scroll"
               style={{
                 minWidth: "100%",
                 overflowX: "auto",
+                cursor: isDragging ? "grabbing" : "grab",
+                userSelect: "none",
               }}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseLeave}
             >
               <ModuleCard
                 imageSrc="/images/Target.png"
@@ -263,7 +342,7 @@ export default function AllModules() {
                 text="Учимся ставить цели"
                 locked={getModuleStatus(1) === "locked"}
                 bgColor="#DFB57F"
-                onClick={() => setSelectedModule(1)}
+                onClick={() => handleModuleClick(1)}
               />
               <ModuleCard
                 imageSrc="/images/Coins.png"
@@ -272,7 +351,7 @@ export default function AllModules() {
                 text="Знакомимся с миром инвестиций"
                 locked={getModuleStatus(2) === "locked"}
                 bgColor="#E9CDA7"
-                onClick={() => setSelectedModule(2)}
+                onClick={() => handleModuleClick(2)}
               />
               <ModuleCard
                 imageSrc="/images/Tablet.png"
@@ -281,7 +360,7 @@ export default function AllModules() {
                 text="Исследуем инструменты инвестора"
                 locked={getModuleStatus(3) === "locked"}
                 bgColor="#DFB57F"
-                onClick={() => setSelectedModule(3)}
+                onClick={() => handleModuleClick(3)}
               />
               <ModuleCard
                 imageSrc="/images/Bag with stuff.png"
@@ -290,40 +369,29 @@ export default function AllModules() {
                 text="Собираем твой первый портфель"
                 locked={getModuleStatus(4) === "locked"}
                 bgColor="#E9CDA7"
-                onClick={() => setSelectedModule(4)}
+                onClick={() => handleModuleClick(4)}
               />
             </div>
             <style jsx>{`
-              /* Скрываем скроллбар на мобильных устройствах */
-              @media (max-width: 768px) {
-                .modules-scroll {
-                  scrollbar-width: none;
-                }
-                .modules-scroll::-webkit-scrollbar {
-                  display: none;
-                }
+              /* Скрываем скроллбар на всех устройствах */
+              .modules-scroll {
+                scrollbar-width: none;
+              }
+              .modules-scroll::-webkit-scrollbar {
+                display: none;
               }
 
-              /* Показываем скроллбар на десктопе */
-              @media (min-width: 769px) {
-                .modules-scroll {
-                  scrollbar-width: thin;
-                  scrollbar-color: #749484 #f5ecda;
-                }
-                .modules-scroll::-webkit-scrollbar {
-                  height: 8px;
-                }
-                .modules-scroll::-webkit-scrollbar-track {
-                  background: #f5ecda;
-                  border-radius: 4px;
-                }
-                .modules-scroll::-webkit-scrollbar-thumb {
-                  background: #749484;
-                  border-radius: 4px;
-                }
-                .modules-scroll::-webkit-scrollbar-thumb:hover {
-                  background: #5a7a6a;
-                }
+              /* Стили для drag-to-scroll */
+              .modules-scroll {
+                -webkit-overflow-scrolling: touch;
+              }
+
+              .modules-scroll * {
+                pointer-events: ${isDragging ? "none" : "auto"};
+              }
+
+              .modules-scroll:active {
+                cursor: grabbing;
               }
             `}</style>
           </div>
