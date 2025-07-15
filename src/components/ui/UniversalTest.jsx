@@ -13,8 +13,7 @@ export default function UniversalTest({ moduleId, lessonId }) {
   const [isChecked, setIsChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(null);
   const [userAnswers, setUserAnswers] = useState([]);
-  const [logs, setLogs] = useState([]);
-  const [showLogs, setShowLogs] = useState(false);
+
   const [isProcessing, setIsProcessing] = useState(false);
 
   const router = useRouter();
@@ -31,19 +30,6 @@ export default function UniversalTest({ moduleId, lessonId }) {
     debugMode: process.env.NODE_ENV === "development",
   });
 
-  // Функция для добавления логов на страницу
-  const addLog = (type, message, data = null) => {
-    const timestamp = new Date().toLocaleTimeString();
-    const logEntry = {
-      timestamp,
-      type,
-      message,
-      data: data ? JSON.stringify(data, null, 2) : null,
-    };
-    setLogs((prev) => [...prev, logEntry]);
-    console.log(`[${type.toUpperCase()}] ${message}`, data || "");
-  };
-
   useEffect(() => {
     // Загружаем данные теста из JSON файла
     const moduleData = testsData[moduleId];
@@ -54,11 +40,9 @@ export default function UniversalTest({ moduleId, lessonId }) {
       // Запускаем таймер когда тест загружен
       if (lessonTimer && !lessonTimer.isActive) {
         lessonTimer.startTimer();
-        addLog("info", `Таймер теста запущен для урока ${numericLessonId}`);
       }
     } else {
       console.error(`Test data not found for ${moduleId}/${lessonId}`);
-      addLog("error", `Данные теста не найдены для ${moduleId}/${lessonId}`);
     }
   }, [moduleId, lessonId, numericLessonId, lessonTimer]);
 
@@ -68,7 +52,6 @@ export default function UniversalTest({ moduleId, lessonId }) {
       if (lessonTimer && lessonTimer.isActive) {
         // Не останавливаем таймер здесь, он должен продолжать работать
         // до успешного завершения теста
-        addLog("info", "Компонент размонтирован, таймер продолжает работать");
       }
     };
   }, [lessonTimer]);
@@ -120,50 +103,13 @@ export default function UniversalTest({ moduleId, lessonId }) {
     if (!testData || !numericLessonId) return;
 
     setIsProcessing(true);
-    setShowLogs(true);
-    setLogs([]); // Очищаем предыдущие логи
-
-    addLog("info", "Начало завершения теста", {
-      moduleId,
-      lessonId,
-      lessonUrl,
-      numericLessonId,
-      telegramUser: telegramUser
-        ? { id: telegramUser.id, first_name: telegramUser.first_name }
-        : null,
-      userAnswers,
-      correctAnswers: testData.map((q) => q.correct),
-      timerInfo: lessonTimer
-        ? {
-            isActive: lessonTimer.isActive,
-            elapsedTime: lessonTimer.formattedTime,
-            elapsedSeconds: lessonTimer.getElapsedSeconds(),
-          }
-        : null,
-    });
 
     try {
-      addLog("info", "Вызов checkTestWithTimer...");
-
-      // Определяем режим работы (тест или продакшн)
-      const testMode = process.env.NODE_ENV === "development"; // В dev режиме показываем логи
-
-      if (testMode) {
-        addLog("info", "РЕЖИМ РАЗРАБОТКИ: показываем детальные логи");
-      }
-
       // Обработчик успешного завершения урока
       const onLessonCompleted = async (result) => {
-        addLog("success", "Урок успешно завершен!", result);
-
         if (result.module_completed) {
-          addLog(
-            "celebration",
-            `🎉 Поздравляем! Вы завершили модуль ${result.module_id}!`,
-            {
-              moduleId: result.module_id,
-              stats: result.stats,
-            }
+          console.log(
+            `🎉 Поздравляем! Вы завершили модуль ${result.module_id}!`
           );
         }
       };
@@ -178,16 +124,9 @@ export default function UniversalTest({ moduleId, lessonId }) {
         lessonTimer, // Передаем объект таймера
         onLessonCompleted,
         refreshUserData, // Передаем функцию обновления данных пользователя
-        addLog, // Передаем функцию логирования
       });
-
-      addLog("success", "checkTestWithTimer завершен успешно");
     } catch (error) {
-      addLog("error", "Ошибка в checkTestWithTimer", {
-        message: error.message,
-        details: error.details,
-        stack: error.stack,
-      });
+      console.error("Ошибка в checkTestWithTimer:", error);
     } finally {
       setIsProcessing(false);
     }
@@ -346,192 +285,6 @@ export default function UniversalTest({ moduleId, lessonId }) {
           </div>
         )}
       </div>
-
-      {/* Панель логов */}
-      {showLogs && (
-        <div
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0, 0, 0, 0.8)",
-            zIndex: 1000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "20px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "20px",
-              maxWidth: "90%",
-              maxHeight: "80%",
-              overflow: "auto",
-              width: "100%",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: "20px",
-                borderBottom: "1px solid #eee",
-                paddingBottom: "10px",
-              }}
-            >
-              <h3 style={{ margin: 0, fontSize: "18px", fontWeight: "bold" }}>
-                Логи завершения теста
-                {lessonTimer && (
-                  <span
-                    style={{
-                      fontSize: "14px",
-                      fontWeight: "normal",
-                      color: "#666",
-                      marginLeft: "10px",
-                    }}
-                  >
-                    (Время: {lessonTimer.formattedTime})
-                  </span>
-                )}
-              </h3>
-              <button
-                onClick={() => setShowLogs(false)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "20px",
-                  cursor: "pointer",
-                  padding: "5px",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {isProcessing && (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: "20px",
-                  fontSize: "16px",
-                  color: "#666",
-                }}
-              >
-                Обработка теста...
-                {lessonTimer && (
-                  <div style={{ fontSize: "14px", marginTop: "5px" }}>
-                    Время теста: {lessonTimer.formattedTime}
-                  </div>
-                )}
-              </div>
-            )}
-
-            <div style={{ maxHeight: "400px", overflow: "auto" }}>
-              {logs.map((log, index) => (
-                <div
-                  key={index}
-                  style={{
-                    marginBottom: "15px",
-                    padding: "10px",
-                    borderRadius: "8px",
-                    backgroundColor:
-                      log.type === "error"
-                        ? "#ffebee"
-                        : log.type === "warning"
-                        ? "#fff3e0"
-                        : log.type === "success"
-                        ? "#e8f5e8"
-                        : log.type === "celebration"
-                        ? "#f3e5f5"
-                        : "#f5f5f5",
-                    borderLeft: `4px solid ${
-                      log.type === "error"
-                        ? "#f44336"
-                        : log.type === "warning"
-                        ? "#ff9800"
-                        : log.type === "success"
-                        ? "#4caf50"
-                        : log.type === "celebration"
-                        ? "#9c27b0"
-                        : "#2196f3"
-                    }`,
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginBottom: "5px",
-                    }}
-                  >
-                    <strong
-                      style={{
-                        color:
-                          log.type === "error"
-                            ? "#d32f2f"
-                            : log.type === "warning"
-                            ? "#f57c00"
-                            : log.type === "success"
-                            ? "#388e3c"
-                            : log.type === "celebration"
-                            ? "#7b1fa2"
-                            : "#1976d2",
-                      }}
-                    >
-                      {log.type === "celebration" ? "🎉" : ""}{" "}
-                      {log.type.toUpperCase()}
-                    </strong>
-                    <span style={{ fontSize: "12px", color: "#666" }}>
-                      {log.timestamp}
-                    </span>
-                  </div>
-                  <div style={{ fontSize: "14px", marginBottom: "5px" }}>
-                    {log.message}
-                  </div>
-                  {log.data && (
-                    <pre
-                      style={{
-                        fontSize: "12px",
-                        backgroundColor: "#f8f9fa",
-                        padding: "8px",
-                        borderRadius: "4px",
-                        overflow: "auto",
-                        whiteSpace: "pre-wrap",
-                        wordBreak: "break-word",
-                      }}
-                    >
-                      {log.data}
-                    </pre>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {!isProcessing && logs.length > 0 && (
-              <div
-                style={{
-                  textAlign: "center",
-                  marginTop: "20px",
-                  padding: "10px",
-                  backgroundColor: "#f0f0f0",
-                  borderRadius: "8px",
-                }}
-              >
-                <strong>Обработка завершена!</strong>
-                <br />
-                <small>Проверьте логи выше для диагностики проблем</small>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useUser } from "@/contexts/UserContext";
 
 export default function Profile() {
-  const [showCopyPopup, setShowCopyPopup] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
 
   // Получаем данные пользователя из контекста
   const {
@@ -23,11 +23,11 @@ export default function Profile() {
 
     try {
       await navigator.clipboard.writeText(inviteLink);
-      setShowCopyPopup(true);
+      setIsLinkCopied(true);
 
-      // Скрываем попап через 2 секунды
+      // Возвращаем текст кнопки через 2 секунды
       setTimeout(() => {
-        setShowCopyPopup(false);
+        setIsLinkCopied(false);
       }, 2000);
     } catch (error) {
       console.error("Ошибка копирования:", error);
@@ -39,9 +39,9 @@ export default function Profile() {
       document.execCommand("copy");
       document.body.removeChild(textArea);
 
-      setShowCopyPopup(true);
+      setIsLinkCopied(true);
       setTimeout(() => {
-        setShowCopyPopup(false);
+        setIsLinkCopied(false);
       }, 2000);
     }
   };
@@ -133,23 +133,6 @@ export default function Profile() {
 
   return (
     <div className="bg-white min-h-screen">
-      {/* Попап с уведомлением о копировании */}
-      {showCopyPopup && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white rounded-[15px] px-[30px] py-[20px] mx-[20px] text-center shadow-lg">
-            <div className="text-[16px] font-semibold text-[#283B41] mb-[10px]">
-              Ссылка скопирована!
-            </div>
-            <div className="text-[14px] text-[#666] mb-[15px]">
-              Теперь вы можете поделиться ей с друзьями
-            </div>
-            <div className="text-[12px] text-[#749484] bg-[#F5ECDA] rounded-[8px] px-[10px] py-[5px]">
-              https://t.me/junior_blago_bot
-            </div>
-          </div>
-        </div>
-      )}
-
       <div className="container-without-padding text-center">
         <div className="h-[326px] bg-[#749484] rounded-b-[15px] pt-[30px] pl-[16px] pr-[16px]">
           <Link
@@ -254,7 +237,7 @@ export default function Profile() {
               type="button"
               onClick={handleInviteFriends}
             >
-              Пригласить друзей
+              {isLinkCopied ? "Ссылка скопирована" : "Пригласить друзей"}
             </button>
           </div>
 
