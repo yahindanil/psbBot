@@ -44,7 +44,9 @@ const lessonPages = [
         </div>
         <p className="text-[16px] text-white mb-[30px]">
           В инвестициях тоже есть такие предметы — вернее, инструменты.{" "}
-          <span className="bg-[#DFB57F]">Они помогают приумножать деньги.</span>
+          <span className="font-semibold">
+            Они помогают приумножать деньги.
+          </span>
         </p>
         <p className="text-[16px] text-white">Сейчас объясню подробнее.</p>
         <div className="flex justify-center mt-[20px]">
@@ -75,7 +77,8 @@ const lessonPages = [
           инвентарь, купить броню или потратить на прокачку способностей.
         </p>
         <p className="text-[16px] mb-[30px]">
-          Инвестиционные инструменты — это такие же способы управлять деньгами.
+          Инвестиционные инструменты — это такие же{" "}
+          <span className="bg-[#D8E2DE]">способы управлять деньгами.</span>
         </p>
         <div className="flex justify-center">
           <Image
@@ -101,13 +104,16 @@ const lessonPages = [
           <div className="text-[10px] text-[#D8E2DE]">3/7</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          Это могут быть акции, облигации, ПИФы и другие, разберем их в
-          следующих уроках. Они помогают сохранить и приумножить накопления.
+          <span className="bg-[#D8E2DE]">
+            Это могут быть акции, облигации, ПИФы
+          </span>{" "}
+          и другие, разберем их в следующих уроках. Они помогают сохранить и
+          приумножить накопления.
         </p>
         <p className="text-[16px] mb-[30px]">
-          Смысл такой: ты вкладываешь деньги, чтобы получить больше в будущем.
-          Только результат не гарантирован. Ты можешь получить больше, меньше
-          или даже ничего.
+          <span className="font-semibold">Смысл такой:</span> ты вкладываешь
+          деньги, чтобы получить больше в будущем. Только результат не
+          гарантирован. Ты можешь получить больше, меньше или даже ничего.
         </p>
       </>
     ),
@@ -125,8 +131,9 @@ const lessonPages = [
           <div className="text-[10px] text-[#D8E2DE]">4/7</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          Это как применить зелье в игре: если не знаешь, что оно делает, можно
-          как прокачаться, так и телепортнуться в ловушку.
+          <span className="font-semibold">Это как применить зелье в игре:</span>{" "}
+          если не знаешь, что оно делает, можно как прокачаться, так и
+          телепортнуться в ловушку.
         </p>
         <div className="flex justify-center">
           <Image
@@ -155,7 +162,7 @@ const lessonPages = [
           Когда инвестор определил цель и выбирает, куда вложить деньги, он
           задает себе три вопроса:
         </p>
-        <ul className="text-[16px] space-y-[15px]">
+        <ul className="text-[16px] space-y-[15px] list-disc pl-[20px]">
           <li>
             <strong>Зачем я инвестирую?</strong> Например, чтобы защитить
             сбережения от инфляции.
@@ -181,9 +188,11 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <p className="text-[16px]">
-            Например, чтобы накопить деньги на поездку через 1 месяц, обычно
-            инвестиционные инструменты не выбирают. За такое короткое время они
-            не успеют принести доход или даже уйдут в минус.
+            <span className="font-semibold">Например,</span> чтобы накопить
+            деньги на поездку через 1 месяц, обычно инвестиционные инструменты
+            не выбирают. За такое короткое время они{" "}
+            <span className="bg-[#D8E2DE]">не успеют принести доход</span> или
+            даже уйдут в минус.
           </p>
           <div className="text-[10px] text-[#D8E2DE]">6/7</div>
         </div>
@@ -209,9 +218,7 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <h2 className="text-[16px] font-semibold text-white">
-            Коротко о главном
-          </h2>
+          <div></div>
           <div className="text-[10px] text-[#D8E2DE]">7/7</div>
         </div>
         <div className="flex justify-center mb-[30px]">
@@ -223,13 +230,17 @@ const lessonPages = [
             loading="eager"
           />
         </div>
-        <p className="text-[16px] text-white">
-          <span className="bg-[#DFB57F]">
-            Инвестиционные инструменты — это способы использовать деньги
-            разумно.
-          </span>{" "}
-          Они помогают сохранять деньги и приумножать их.
-        </p>
+        <div className="text-center">
+          <h2 className="text-[16px] font-semibold text-white">
+            Коротко о главном
+          </h2>
+          <p className="text-[16px] text-white">
+            <span className="bg-[#DFB57F]">Инвестиционные инструменты —</span>{" "}
+            <br />
+            это способы использовать деньги разумно. Они помогают сохранять
+            деньги и приумножать их.
+          </p>
+        </div>
       </>
     ),
     bg: "bg-[#749484] text-white",

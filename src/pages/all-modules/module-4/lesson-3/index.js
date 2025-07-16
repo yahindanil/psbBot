@@ -40,7 +40,7 @@ const lessonPages = [
             В инвестициях есть простое правило: чтобы рисков было меньше, деньги
             нужно распределять по разным инструментам. Это называют
             диверсификацией.{" "}
-            <span className="bg-[#DFB57F]">Рассказываю подробнее.</span>
+            <span className="font-semibold">Рассказываю подробнее.</span>
           </p>
           <div className="text-[10px] text-[#D8E2DE]">1/7</div>
         </div>
@@ -69,13 +69,18 @@ const lessonPages = [
           <div className="text-[10px] text-[#D8E2DE]">2/7</div>
         </div>
         <p className="text-[16px] mb-[18px]">
-          В мире постоянно что-то меняется. Даже самые надежные компании время
-          от времени испытывают трудности, а неприметные стартапы резко
-          становятся популярными.
+          <span className="font-semibold">
+            В мире постоянно что-то меняется.
+          </span>{" "}
+          Даже самые надежные компании время от времени испытывают трудности, а
+          неприметные стартапы резко становятся популярными.
         </p>
         <p className="text-[16px] mb-[18px]">
           Невозможно заранее сказать, какая компания вырастет, а какая
-          обанкротится. Поэтому в инвестициях всегда есть риск потерять деньги.
+          обанкротится. Поэтому в инвестициях{" "}
+          <span className="bg-[#D8E2DE]">
+            всегда есть риск потерять деньги.
+          </span>
         </p>
         <div className="flex justify-center">
           <Image
@@ -102,7 +107,7 @@ const lessonPages = [
           <div className="text-[10px] text-[#D8E2DE]">3/7</div>
         </div>
         <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">
+          <span className="font-semibold">
             Диверсификация — это когда ты распределяешь деньги между разными
             инструментами.
           </span>{" "}
@@ -141,8 +146,8 @@ const lessonPages = [
           Распределять деньги можно по-разному:
         </p>
         <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Вложить часть в акции, часть — в облигации.
+          <span className="font-semibold">
+            ✅ Вложить часть в акции, часть — в облигации.
           </span>{" "}
           Обычно часть денег вкладывают в акции, чтобы была возможность
           заработать на росте бизнеса.
@@ -162,17 +167,18 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <p className="text-[16px] mb-[30px]">
-            Если тебе важнее стабильность, можно вложить большую часть в
-            облигации и чуть меньше — в акции.
+            <span className="bg-[#D8E2DE]">Если тебе важнее стабильность,</span>{" "}
+            можно вложить большую часть в облигации и чуть меньше — в акции.
           </p>
           <div className="text-[10px] text-[#D8E2DE]">5/7</div>
         </div>
         <p className="text-[16px] mb-[18px]">
-          Если хочется рискнуть, чтобы больше заработать, можно сделать
-          наоборот: больше акций, меньше облигаций.
+          <span className="bg-[#D8E2DE]">Если хочется рискнуть,</span> чтобы
+          больше заработать, можно сделать наоборот: больше акций, меньше
+          облигаций.
         </p>
         <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">
+          <span className="font-semibold">
             А вот вкладывать всё в акции новичку точно не стоит:
           </span>{" "}
           это слишком рискованная стратегия.
@@ -196,17 +202,15 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <p className="text-[16px] mb-[30px]">
-            <span className="bg-[#D8E2DE] font-semibold">
-              Использовать ПИФы,
-            </span>{" "}
-            где за тебя уже собрали разные активы в готовый портфель. Ты
-            покупаешь пай и уже получаешь долю в ПИФе.
+            <span className="font-semibold">✅ Использовать ПИФы,</span> где за
+            тебя уже собрали разные активы в готовый портфель. Ты покупаешь пай
+            и уже получаешь долю в ПИФе.
           </p>
           <div className="text-[10px] text-[#D8E2DE]">6/7</div>
         </div>
         <p className="text-[16px] mb-[18px]">
-          <span className="bg-[#D8E2DE] font-semibold">
-            Выбирать активы из разных отраслей.
+          <span className="font-semibold">
+            ✅ Выбирать активы из разных отраслей.
           </span>{" "}
           Например, вложить часть денег в IT-компании, часть — в энергетику,
           часть — в транспорт. Если в одной сфере начнутся проблемы, другие

@@ -11,7 +11,8 @@ const lessonPages = [
     content: (
       <>
         <h1 className="text-center text-[24px] font-semibold mb-[24px]">
-          <span className="bg-[#E9CDA7]">Доходность и риск</span> — <br />
+          <span className="bg-[#E9CDA7]">Доходность и риск — </span>
+          <br />
           как они связаны
         </h1>
         <p className="text-center text-[16px] mb-[24px] px-[20px]">
@@ -69,18 +70,21 @@ const lessonPages = [
     type: "lesson",
     content: (
       <>
-        <div className="flex justify-end mb-[15px]">
-          <p className="text-[16px] mb-[30px]">Доходность считают так:</p>
+        <div className="flex justify-between mb-[15px]">
+          <p className="text-[16px] mb-[20px] font-semibold">
+            Доходность считают так:
+          </p>
           <div className="text-[10px] text-gray-400">2/8</div>
         </div>
-        <p className="text-[16px] mb-[30px]">
+        <p className="text-[16px] mb-[20px] bg-[#D8E2DE]">
           (Заработок / Вложенная сумма) × 100
         </p>
-        <p className="text-[16px] mb-[30px]">
-          Например, если ты вкладываешь 10 000 рублей, а через год твои
-          инвестиции стали стоить 11 000 рублей, то доходность — 10% годовых.
+        <p className="text-[16px] mb-[20px]">
+          <span className="font-semibold">Например,</span> если ты вкладываешь
+          10 000 рублей, а через год твои инвестиции стали стоить 11 000 рублей,
+          то доходность — 10% годовых.
         </p>
-        <p className="text-[16px] mb-[30px]">(1000 / 10 000) × 100 = 10%</p>
+        <p className="text-[16px] mb-[20px]">(1000 / 10 000) × 100 = 10%</p>
       </>
     ),
     bg: "bg-white text-black",
@@ -91,17 +95,19 @@ const lessonPages = [
       <>
         <div className="flex justify-end mb-[15px]">
           <p className="text-[16px] mb-[30px]">
-            В инвестициях можно получить доход двумя способами:
+            В инвестициях можно получить доход{" "}
+            <span className="bg-[#D8E2DE]">двумя способами:</span>
           </p>
           <div className="text-[10px] text-[#D8E2DE]">3/8</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          <span className="bg-[#D8E2DE] font-semibold">Первый</span> — за счет
-          роста стоимости. Например, покупаешь ценную бумагу за 1000 рублей, а
-          потом продаешь за 1200. Твой доход — 200 рублей.
+          <span className=" font-semibold">Первый</span> — за счет роста
+          стоимости. Например, покупаешь ценную бумагу за 1000 рублей, а потом
+          продаешь за 1200. Твой доход — 200 рублей.
         </p>
         <p className="text-[16px] mb-[30px]">
-          Но это сработает, если цена вырастет, а она может и упасть.
+          Но это сработает, если цена вырастет,{" "}
+          <span className="bg-[#D8E2DE]">а она может и упасть.</span>
         </p>
       </>
     ),
@@ -113,9 +119,10 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <p className="text-[16px]">
-            <span className="bg-[#D8E2DE] font-semibold">Второй способ</span> —
-            получать выплаты от компаний, в которые вкладываешь деньги.
-            Подробнее разберем, как это работает, в следующих уроках.
+            <span className="font-semibold">Второй способ</span> — получать
+            <span className="bg-[#D8E2DE]">выплаты от компаний,</span> в которые
+            вкладываешь деньги. Подробнее разберем, как это работает, в
+            следующих уроках.
           </p>
           <div className="text-[10px] text-gray-400">4/8</div>
         </div>
@@ -141,13 +148,13 @@ const lessonPages = [
           <div className="text-[10px] text-gray-400">5/8</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          Риск — это вероятность потерять часть вложенных денег или заработать
-          меньше, чем ожидаешь.
+          Риск — <span className="bg-[#D8E2DE]">это вероятность потерять</span>{" "}
+          часть вложенных денег или заработать меньше, чем ожидаешь.
         </p>
         <p className="text-[16px] mb-[30px]">
-          <span className="bg-[#E9CDA7] font-semibold">Например,</span> компания
-          может закрыться, а у тебя останутся ее ценные бумаги, которые теперь
-          ничего не стоят.
+          <span className="font-semibold">Например,</span> компания может
+          закрыться, а у тебя останутся ее ценные бумаги, которые теперь ничего
+          не стоят.
         </p>
       </>
     ),
@@ -160,14 +167,14 @@ const lessonPages = [
         <div className="flex justify-between items-start mb-[15px]">
           <p className="text-[16px]">
             В инвестициях всегда есть риск, даже в тех, которые кажутся очень
-            надежными. Избавиться от риска нельзя. Можно только выбрать, какой
-            уровень риска тебе подходит.
+            надежными. Избавиться от риска нельзя. Можно только выбрать, какой{" "}
+            <span className="bg-[#D8E2DE]">уровень риска</span> тебе подходит.
           </p>
           <div className="text-[10px] text-gray-400">6/8</div>
         </div>
         <div className="flex justify-center mb-auto">
           <Image
-            src="/images/lesson 5/3.png"
+            src="/images/lesson 10/3.png"
             alt="Artem pointing"
             width={249}
             height={208}
@@ -190,14 +197,13 @@ const lessonPages = [
           <div className="text-[10px] text-gray-400">7/8</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          В инвестициях есть правило: если доходность высокая — значит, и риск
-          потерять деньги тоже высокий.
+          <span className="font-semibold">В инвестициях есть правило:</span>{" "}
+          если доходность высокая — значит, и риск потерять деньги тоже высокий.
         </p>
         <p className="text-[16px] mb-[30px]">
-          <span className="bg-[#D8E2DE] font-semibold">Высокий доход</span> —
-          это плата за неопределенность. Например, покупка ценных бумаг
-          технологичного стартапа за год может как вырасти в два раза, так и
-          резко упасть.
+          <span className="bg-[#D8E2DE]">Высокий доход</span> — это плата за
+          неопределенность. Например, покупка ценных бумаг технологичного
+          стартапа за год может как вырасти в два раза, так и резко упасть.
         </p>
         <div className="flex justify-center mb-auto">
           <Image
@@ -219,19 +225,7 @@ const lessonPages = [
         <div className="flex justify-end mb-[15px]">
           <div className="text-[10px] text-white">8/8</div>
         </div>
-        <h2 className="text-[24px] font-semibold mb-[30px] text-white">
-          Коротко о главном
-        </h2>
-        <p className="text-[16px] mb-[30px] text-white">
-          В инвестициях доходность и риск всегда связаны. Нет инвестиций, где
-          доход высокий, а рисков нет.
-          <span className="bg-[#E9CDA7] text-black font-semibold">
-            {" "}
-            Чем выше твоя обещаемая доходность
-          </span>
-          , тем внимательнее нужно разбираться, чем ты рискуешь.
-        </p>
-        <div className="flex justify-center mb-auto">
+        <div className="flex flex-col items-center">
           <Image
             src="/images/lesson 5/5.png"
             alt="Lightbulb with stars"
@@ -239,6 +233,19 @@ const lessonPages = [
             height={208}
             loading="eager"
           />
+          <h2 className="text-[24px] font-semibold mb-[30px] text-white text-center">
+            Коротко о главном
+          </h2>
+          <p className="text-[16px] mb-[30px] text-white text-center">
+            В инвестициях доходность и риск всегда связаны. Нет инвестиций, где
+            доход высокий, а рисков нет.
+            <span className="bg-[#E9CDA7]">
+              {" "}
+              Чем выше твоя обещаемая доходность
+            </span>
+            , тем внимательнее нужно разбираться, чем ты рискуешь.
+          </p>
+          <div className="flex justify-center mb-auto"></div>
         </div>
       </>
     ),
@@ -248,7 +255,7 @@ const lessonPages = [
     type: "test",
     content: (
       <TestBlock
-        testUrl="/all-modules/module-2/lesson-1/test"
+        testUrl="/all-modules/module-3/lesson-4/test"
         variant="module2"
       />
     ),

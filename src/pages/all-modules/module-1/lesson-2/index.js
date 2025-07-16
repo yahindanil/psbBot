@@ -186,7 +186,7 @@ const lessonPages = [
           <div className="text-[10px] text-[#D8E2DE]">5/7</div>
         </div>
         <p className="text-[16px] mb-[30px]">
-          <span className="bg-[#D8E2DE] font-semibold">Например, так:</span>
+          <span className="bg-[#D8E2DE]">Например, так:</span>
           <br />
           — Хочу накопить 5000 ₽ за два <br />
           месяца на наушники. <br />
@@ -213,7 +213,8 @@ const lessonPages = [
           на что попало. А если цель есть — ты сам <br />
           выбираешь, сколько отложить, на что <br />
           потратить карманные деньги, от чего <br />
-          отказаться. С этого начинается контроль над деньгами
+          отказаться. <span className="bg-[#D8E2DE]">
+          С этого начинается контроль</span> над деньгами
         </p>
         <div className="flex justify-center mt-[20px]">
           <Image
