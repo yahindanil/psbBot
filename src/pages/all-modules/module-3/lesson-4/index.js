@@ -25,7 +25,7 @@ const lessonPages = [
         </p>
         <div className="mb-[11px]">
           <Image
-            src="/images/lesson 5/main (4).png"
+            src="/images/lesson 10/main (4).png"
             alt="Artem with charts"
             width={501.45}
             height={398}
