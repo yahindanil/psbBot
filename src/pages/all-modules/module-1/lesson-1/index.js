@@ -36,9 +36,9 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <h2>Представь: тебе подарили 3000 ₽.</h2>
-          <div className="text-[10px] text-[#D8E2DE]">1/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">1/9</div>
         </div>
-        <p className="text-[16px] mb-[53px]">
+        <p className="text-[19px] mb-[53px]">
           Проходит всего пара дней — и ты не можешь вспомнить, куда они делись.
           Вроде ничего особенного не купил, но денег уже нет. Почему так
           произошло?
@@ -47,8 +47,8 @@ const lessonPages = [
           <Image
             src="/images/Money.png"
             alt="Lock Icon"
-            width={249}
-            height={208}
+            width={199}
+            height={166}
             loading="eager"
           />
         </div>
@@ -65,20 +65,20 @@ const lessonPages = [
             Почему деньги <br />{" "}
             <span className="bg-[#E9CDA7]">быстро исчезают</span>
           </h2>
-          <div className="text-[10px] text-[#D8E2DE]">2/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">2/9</div>
         </div>
-        <p className="text-[16px] mb-[30px]">
+        <p className="text-[19px] mb-[30px]">
           Деньги исчезают не потому, что с ними происходит что-то мистическое.
           Просто мы не всегда замечаем, на что тратим.
         </p>
-        <p className="mb-[30px]">
+        <p className="text-[19px] mb-[30px]">
           <span className="bg-[#D8E2DE] font-semibold">
             Приводим несколько сценариев:
           </span>{" "}
           увидел прикольный чехол для телефона — не удержался и купил, пошел с
           друзьями в кафе голодный — купил лишнюю булочку.
         </p>
-        <p>
+        <p className="text-[19px]">
           Суммы вроде небольшие, но если не следить, за пару дней можно
           потратить все карманные деньги.
         </p>
@@ -92,15 +92,15 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <h2>Как распоряжаться деньгами — это выбор</h2>
-          <div className="text-[10px] text-[#D8E2DE]">3/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">3/9</div>
         </div>
-        <p className="text-[16px] mb-[18px]">
+        <p className="text-[19px] mb-[18px]">
           Деньги у всех появляются примерно одинаково. Например, вы с друзьями
           сделали что-то полезное по дому, продали на Авито свою коллекцию лего
           или получили деньги в подарок на день рождения. Но что дальше с ними
           будет, зависит от каждого из вас.
         </p>
-        <p className="text-[16px] mb-[18px]">
+        <p className="text-[19px] mb-[18px]">
           <span className="bg-[#D8E2DE] font-semibold">Приводим примеры:</span>{" "}
           кто-то тратит все сразу, а кто-то планирует и откладывает на новый
           велик. Все дело в выборе.
@@ -128,13 +128,13 @@ const lessonPages = [
             <br />
             удержать деньги
           </h2>
-          <div className="text-[10px] text-[#D8E2DE]">4/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">4/9</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
+        <p className="text-[19px] mb-[10px]">
           Есть три привычки, из-за которых деньги заканчиваются быстрее, чем
           хотелось бы.
         </p>
-        <p className="text-[16px] mb-[18px]">
+        <p className="text-[19px] mb-[18px]">
           <span className="bg-[#D8E2DE] font-semibold">Привычка 1.</span>{" "}
           Покупать на эмоциях. Видишь яркий скетчбук или значки на рюкзак — и в
           тот же момент покупаешь. Хотя дома уже есть два скетчбука, а значков —
@@ -145,8 +145,8 @@ const lessonPages = [
           <Image
             src="/images/Artem smiling.png"
             alt="Lock Icon"
-            width={264}
-            height={233}
+            width={211}
+            height={186}
             loading="eager"
           />
         </div>
@@ -164,9 +164,9 @@ const lessonPages = [
             <br />
             удержать деньги
           </h2>
-          <div className="text-[10px] text-[#D8E2DE]">5/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">5/9</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
+        <p className="text-[19px] mb-[10px]">
           <span className="bg-[#D8E2DE] font-semibold">
             Привычка 2. Повторять за другими.
           </span>
@@ -174,7 +174,7 @@ const lessonPages = [
           Друг купил наушники, у одноклассников мерч от любимого блогера — и
           тебе тоже хочется.
         </p>
-        <p className="text-[16px] mb-[18px]">
+        <p className="text-[19px] mb-[18px]">
           Скорее всего, тебе эти вещи не нужны, но ты все равно покупаешь. Так
           деньги незаметно уходят на все подряд.
         </p>
@@ -192,16 +192,16 @@ const lessonPages = [
             <br />
             удержать деньги
           </h2>
-          <div className="text-[10px] text-[#D8E2DE]">6/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">6/9</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
+        <p className="text-[19px] mb-[10px]">
           <span className="bg-[#D8E2DE] font-semibold">
             Привычка 3. Ждать легких денег.
           </span>
           <br />В соцсетях часто попадается реклама: «Вложи сюда пару тысяч — и
           за неделю получишь в два раза больше!» Звучит заманчиво.
         </p>
-        <p className="text-[16px] mb-[18px]">
+        <p className="text-[19px] mb-[18px]">
           Но если тебе обещают деньги просто так — это обман. В надежде получить
           больше можно все потерять.
         </p>
@@ -210,8 +210,8 @@ const lessonPages = [
           <Image
             src="/images/Happy and sad Artem.png"
             alt="Lock Icon"
-            width={349}
-            height={238.64}
+            width={279}
+            height={191}
             loading="eager"
           />
         </div>
@@ -225,9 +225,9 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <h2>Управлять деньгами можно научиться</h2>
-          <div className="text-[10px] text-[#D8E2DE]">7/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">7/9</div>
         </div>
-        <p className="text-[16px] mb-[10px]">
+        <p className="text-[19px] mb-[10px]">
           Умение разбираться в деньгах называют{" "}
           <span className="bg-[#D8E2DE]">финансовой грамотностью.</span> Она
           помогает обращаться с деньгами так, чтобы их всегда хватало.
@@ -241,20 +241,20 @@ const lessonPages = [
     content: (
       <>
         <div className="flex justify-between items-start mb-[15px]">
-          <p className="text-[16px] mb-[18px]">
+          <p className="text-[19px] mb-[18px]">
             Финансовая грамотность — это не суперспособность и не скучная
             теория, а простые шаги, которые можно делать каждый день. Расскажу о
             них в следующих уроках.
           </p>
-          <div className="text-[10px] text-[#D8E2DE]">8/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">8/9</div>
         </div>
 
         <div className="flex justify-center mt-[20px]">
           <Image
             src="/images/Artem happy.png"
             alt="Lock Icon"
-            width={324}
-            height={259.37}
+            width={259}
+            height={207}
             loading="eager"
           />
         </div>
@@ -268,21 +268,21 @@ const lessonPages = [
       <>
         <div className="flex justify-between items-start mb-[15px]">
           <div></div>
-          <div className="text-[10px] text-[#D8E2DE]">9/9</div>
+          <div className="text-[12px] text-[#D8E2DE]">9/9</div>
         </div>
         <div className="flex justify-center mt-[20px]">
           <Image
             src="/images/Lightbulb.png"
             alt="Lock Icon"
-            width={191}
-            height={232.41}
+            width={153}
+            height={186}
             loading="eager"
           />
         </div>
-        <h2 className="text-center text-white text-[22px] font-semibold mb-[16px]">
+        <h2 className="text-center text-white text-[26px] font-semibold mb-[16px]">
           Коротко о главном
         </h2>
-        <p className="text-center text-white text-[16px]">
+        <p className="text-center text-white text-[19px]">
           Деньги — это{" "}
           <span className="bg-[#DFB57F]">не магия, а инструмент.</span>
           <br />
@@ -326,43 +326,43 @@ export default function Lesson() {
         <Image
           src="/images/Money.png"
           alt=""
-          width={249}
-          height={208}
+          width={199}
+          height={166}
           priority
         />
         <Image
           src="/images/Snacks or Bike.png"
           alt=""
-          width={285}
-          height={238.64}
+          width={228}
+          height={191}
           priority
         />
         <Image
           src="/images/Artem smiling.png"
           alt=""
-          width={264}
-          height={233}
+          width={211}
+          height={186}
           priority
         />
         <Image
           src="/images/Happy and sad Artem.png"
           alt=""
-          width={349}
-          height={238.64}
+          width={279}
+          height={191}
           priority
         />
         <Image
           src="/images/Artem happy.png"
           alt=""
-          width={324}
-          height={259.37}
+          width={259}
+          height={207}
           priority
         />
         <Image
           src="/images/Lightbulb.png"
           alt=""
-          width={191}
-          height={232.41}
+          width={153}
+          height={186}
           priority
         />
         <Image
